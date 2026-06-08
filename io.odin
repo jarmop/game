@@ -11,7 +11,8 @@ mouse_sensitivity :: 0.1
 mouse_right_pressed := false
 mouse_left_pressed := false
 ctrl_pressed := false
-first_cursor_pos := true
+first_cursor_pos_left := true
+first_cursor_pos_right := true
 prev_cursor_x, prev_cursor_y: f64
 
 init_io :: proc() {
@@ -57,7 +58,7 @@ mouse_button_callback :: proc "c" (window: glfw.WindowHandle, button, action, mo
 			glfw.SetInputMode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
 		} else {
 			mouse_right_pressed = false
-			first_cursor_pos = true
+			first_cursor_pos_right = true
 			glfw.SetInputMode(window, glfw.CURSOR, glfw.CURSOR_NORMAL)
 		}
 	} else if button == glfw.MOUSE_BUTTON_LEFT {
@@ -107,32 +108,33 @@ mouse_button_callback :: proc "c" (window: glfw.WindowHandle, button, action, mo
 				return
 			}
 
-			// Check hit on ground if no hits on creatures
-			if (soldier_selected > -1) {
-				triangle_d: f32 = 0
-				triangle_i := 0
-				triangle: [3][3]f32
-				// Get triangle hit distance
-				min_t: f32 = m.INF_F32
-				for ti := 0; ti < len(ground_vertices) / 3; ti += 1 {
-					i := ti * 3
-					v0 := ground_vertices[i + 0].pos
-					v1 := ground_vertices[i + 1].pos
-					v2 := ground_vertices[i + 2].pos
+			triangle_d: f32 = 0
+			triangle_i := 0
+			triangle: [3][3]f32
+			// Get ground triangle hit distance
+			min_t: f32 = m.INF_F32
+			for ti := 0; ti < len(ground_vertices) / 3; ti += 1 {
+				i := ti * 3
+				v0 := ground_vertices[i + 0].pos
+				v1 := ground_vertices[i + 1].pos
+				v2 := ground_vertices[i + 2].pos
 
-					t: f32 = 0
-					if ray_triangle_intersect(camera.pos, ray_world, v0, v1, v2, &t) {
-						min_t = min(min_t, t)
-						if min_t != triangle_d {
-							triangle_d = min_t
-							triangle_i = ti
-							triangle = {v0, v1, v2}
-						}
+				t: f32 = 0
+				if ray_triangle_intersect(camera.pos, ray_world, v0, v1, v2, &t) {
+					min_t = min(min_t, t)
+					if min_t != triangle_d {
+						triangle_d = min_t
+						triangle_i = ti
+						triangle = {v0, v1, v2}
 					}
 				}
+			}
 
-				if (triangle_d > 0) {
-					entry_point := camera.pos + ray_world * triangle_d
+			// Check hit on ground
+			if (triangle_d > 0) {
+				entry_point := camera.pos + ray_world * triangle_d
+				if (soldier_selected > -1) {
+					// Create path for the selected soldier
 					target := entry_point - CREATURE_CENTER_XZ
 
 					soldier := soldiers[soldier_selected]
@@ -159,18 +161,26 @@ mouse_button_callback :: proc "c" (window: glfw.WindowHandle, button, action, mo
 						// funnel(soldier.pos, e, start_triangle, end_triangle)
 					}
 				} else {
-					soldier_selected = -1
+					// Update height_map_pos
+					height_map_row := int(entry_point.z + 0.5)
+					height_map_col := int(entry_point.x + 0.5)
+
+					height_map_pos.x = f32(height_map_col)
+					height_map_pos.y = height_map[height_map_row][height_map_col]
+					height_map_pos.z = f32(height_map_row)
 				}
+			} else {
+				// Clicking outside the map unselects the soldier
+				soldier_selected = -1
 			}
+
 		} else {
 			mouse_left_pressed = false
-			first_hover = true
+			first_cursor_pos_left = true
 			glfw.SetInputMode(window, glfw.CURSOR, glfw.CURSOR_NORMAL)
 		}
 	}
 }
-
-first_hover := true
 
 cursor_pos_callback :: proc "c" (window: glfw.WindowHandle, x, y: f64) {
 	context = runtime.default_context()
@@ -179,15 +189,21 @@ cursor_pos_callback :: proc "c" (window: glfw.WindowHandle, x, y: f64) {
 		drag_on_right_press(x, y)
 	} else if mouse_left_pressed {
 		drag_on_left_press(x, y)
+	} else {
+		hover(x, y)
 	}
+}
+
+hover :: proc(x, y: f64) {
+
 }
 
 height_d := 0.0
 
 drag_on_left_press :: proc(x, y: f64) {
-	if first_hover {
+	if first_cursor_pos_left {
 		prev_cursor_y = y
-		first_hover = false
+		first_cursor_pos_left = false
 	}
 
 	height_d -= (y - prev_cursor_y) * 0.01
@@ -215,10 +231,10 @@ drag_on_left_press :: proc(x, y: f64) {
 }
 
 drag_on_right_press :: proc(x, y: f64) {
-	if first_cursor_pos {
+	if first_cursor_pos_right {
 		prev_cursor_x = x
 		prev_cursor_y = y
-		first_cursor_pos = false
+		first_cursor_pos_right = false
 	}
 
 	camera.yaw += f32((x - prev_cursor_x) * mouse_sensitivity)
