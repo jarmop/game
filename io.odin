@@ -195,7 +195,62 @@ cursor_pos_callback :: proc "c" (window: glfw.WindowHandle, x, y: f64) {
 }
 
 hover :: proc(x, y: f64) {
+	if (soldier_selected == -1) {
+		context = runtime.default_context()
+		cursor_x, cursor_y := glfw.GetCursorPos(window)
+		window_width, window_height := glfw.GetWindowSize(window)
 
+		// Turn cursor coordinates into OpenGL normalized device coordinates
+		// by changing their range from [0,1] to [-1,1]), and flipping y:
+		x := f32(cursor_x / f64(window_width) * 2 - 1)
+		y := -f32(cursor_y / f64(window_height) * 2 - 1)
+
+		ray_clip := [4]f32{x, y, -1.0, 1.0}
+		proj := l.matrix4_perspective_f32(
+			l.to_radians(camera.fov),
+			f32(window_width) / f32(window_height),
+			camera.near,
+			camera.far,
+		)
+		invp := l.inverse(proj) * ray_clip
+		ray_eye := [4]f32{invp[0], invp[1], -1, 0}
+		view := l.matrix4_look_at_f32(camera.pos, camera.pos + camera.front, camera.up)
+		ray_world := l.normalize((l.inverse(view) * ray_eye).xyz)
+
+		triangle_d: f32 = 0
+		triangle_i := 0
+		triangle: [3][3]f32
+		// Get ground triangle hit distance
+		min_t: f32 = m.INF_F32
+		for ti := 0; ti < len(ground_vertices) / 3; ti += 1 {
+			i := ti * 3
+			v0 := ground_vertices[i + 0].pos
+			v1 := ground_vertices[i + 1].pos
+			v2 := ground_vertices[i + 2].pos
+
+			t: f32 = 0
+			if ray_triangle_intersect(camera.pos, ray_world, v0, v1, v2, &t) {
+				min_t = min(min_t, t)
+				if min_t != triangle_d {
+					triangle_d = min_t
+					triangle_i = ti
+					triangle = {v0, v1, v2}
+				}
+			}
+		}
+
+		if (triangle_d > 0) {
+			// Update height_map_pos
+			entry_point := camera.pos + ray_world * triangle_d
+
+			height_map_row := int(entry_point.z + 0.5)
+			height_map_col := int(entry_point.x + 0.5)
+
+			height_map_pos.x = f32(height_map_col)
+			height_map_pos.y = height_map[height_map_row][height_map_col]
+			height_map_pos.z = f32(height_map_row)
+		}
+	}
 }
 
 height_d := 0.0
