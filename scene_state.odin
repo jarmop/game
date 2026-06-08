@@ -229,6 +229,8 @@ init_state :: proc() {
 
 	json_err := json.unmarshal(data, &height_map)
 	assert(json_err == nil)
+
+	height_map_pos.y = height_map[int(height_map_pos.z)][int(height_map_pos.x)]
 }
 
 save_state :: proc() {

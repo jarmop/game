@@ -131,7 +131,7 @@ init_scene :: proc() {
 		size_of(ground_vertices),
 	)
 
-	init_path()
+	update_pathfinding_data()
 
 	// WALL
 	wall_x_vbo: u32

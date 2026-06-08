@@ -24,7 +24,7 @@ triangle_table: [CELL_COUNT * TRIANGLES_PER_CELL]Triangle
 
 cell_table: [CELL_COUNT]Cell
 
-init_path :: proc() {
+update_pathfinding_data :: proc() {
 	// fmt.println("----------")
 
 	TRIANGLES_PER_ROW :: GRID_SIZE * TRIANGLES_PER_CELL
