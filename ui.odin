@@ -115,6 +115,16 @@ draw_ui :: proc() {
 		PADDING,
 		PADDING + GLYPH_HEIGHT_PX + 100,
 	)
+	draw_text(
+		fmt.tprintf(
+			"Soldier pos: %.1f, %.1f, %.1f",
+			soldiers[0].pos.x,
+			soldiers[0].pos.y,
+			soldiers[0].pos.z,
+		),
+		PADDING,
+		PADDING + GLYPH_HEIGHT_PX + 120,
+	)
 
 }
 

@@ -1,5 +1,6 @@
 package game
 
+import "core:fmt"
 import m "core:math/linalg"
 
 create_grid :: proc(vertices: []Vertex) {
@@ -87,7 +88,7 @@ create_grid :: proc(vertices: []Vertex) {
 			grid_i += 12
 
 			// for v in vertices {
-			// 	fmt.println(v.pos)
+			// 	fmt.println(v.pos)aaaaass
 			// }
 			// fmt.println("****************")
 			// fmt.println(grid_i)
@@ -125,20 +126,31 @@ get_center_y :: proc(top_left, top_right, bottom_left, bottom_right: f32) -> f32
 	// 	   top_right.pos.y + bottom_right.pos.y == foo) {
 	// 	center.pos.y = y / 2
 	// }
+	// if top_left != 0 {
+	// fmt.println(abs(bottom_left - top_right) < 0.01)
+	diagonal1_equal := abs(top_left - bottom_right) < 0.01
+	diagonal2_equal := abs(bottom_left - top_right) < 0.01
 
-	// if top_left == bottom_right {
-	// 	return top_left
+	if diagonal1_equal && diagonal2_equal {
+		return max(top_left, top_right)
+	}
+	if diagonal1_equal {
+		return top_left
+	}
+	if diagonal2_equal {
+		return top_right
+	}
 	// }
-	// if bottom_left == top_right {
-	// 	return top_right
-	// }
-	// return min(top_left + bottom_right, bottom_left + top_right) / 2
 
-	total_h := top_left + top_right + bottom_left + bottom_right
-	// // max_h := max(top_left.pos.y, top_right.pos.y, bottom_left.pos.y, bottom_right.pos.y)
-	// // if (max_h != total_h) {
-	// // 	// More than one above 0
-	return total_h / 4
+
+	return min(top_left + bottom_right, bottom_left + top_right) / 2
+	// return min(top_left, bottom_right, bottom_left, top_right)
+
+	// total_h := top_left + top_right + bottom_left + bottom_right
+	// // // max_h := max(top_left.pos.y, top_right.pos.y, bottom_left.pos.y, bottom_right.pos.y)
+	// // // if (max_h != total_h) {
+	// // // 	// More than one above 0
+	// return total_h / 4
 
 	// }
 	// maxv := max(top_left.pos.y, top_right.pos.y, bottom_left.pos.y, bottom_right.pos.y)

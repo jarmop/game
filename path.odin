@@ -214,8 +214,8 @@ funnel :: proc(start, end: [3]f32, triangle: ^Triangle, end_triangle: ^Triangle)
 		// This can point in the wrong direction
 		entrance_edge = {p0, p1}
 
-		// // if (i < 10) {
-		// if (i == 0) {
+		// if (i < 10) {
+		// if (i == 3 || i == 4) {
 		// 	fmt.println("------------- loop", i, "-------------")
 		// 	fmt.println("sorted", sorted)
 		// 	fmt.println("p1:", p1)
@@ -239,11 +239,9 @@ funnel :: proc(start, end: [3]f32, triangle: ^Triangle, end_triangle: ^Triangle)
 	soldiers[0].target = soldiers[0].path[0]
 }
 
-/*
-	1: closest to target (end point of the two closest edges)
-	2: start point of the closest (not necessarily the second closest corner)
-	3: start point of the second closest edge
-*/
+// 1. The corner that is closest to the target
+// 2. The corner that is the starting point of the edge that is closest to the target
+// 3. The remaining corner
 get_sorted_triangle_corners :: proc(target_point: [3]f32, triangle: [3][3]f32) -> [3]int {
 	// d of corners to target
 	lc: []f32 = {
@@ -261,33 +259,19 @@ get_sorted_triangle_corners :: proc(target_point: [3]f32, triangle: [3][3]f32) -
 			append(&other_indices, i)
 		}
 	}
+	nearest_point := triangle[nearest_point_i]
 
-	normalized_edge_start_points: [2][3]f32 = {
-		triangle[nearest_point_i] -
-		linalg.normalize(triangle[nearest_point_i] - triangle[other_indices[0]]),
-		triangle[nearest_point_i] -
-		linalg.normalize(triangle[nearest_point_i] - triangle[other_indices[1]]),
+	edge0_direction := linalg.normalize(nearest_point.xz - triangle[other_indices[0]].xz)
+	edge1_direction := linalg.normalize(nearest_point.xz - triangle[other_indices[1]].xz)
+
+	// Compare edge distances to the target at points that are equal length away
+	// from the end point of the edges (the nearest corner)
+	if linalg.length(target_point.xz - (nearest_point.xz - edge0_direction)) <
+	   linalg.length(target_point.xz - (nearest_point.xz - edge1_direction)) {
+		return {nearest_point_i, other_indices[0], other_indices[1]}
+	} else {
+		return {nearest_point_i, other_indices[1], other_indices[0]}
 	}
-
-	l: [3]f32
-	l[nearest_point_i] = lc[nearest_point_i]
-	l[other_indices[0]] = linalg.length(target_point.xz - normalized_edge_start_points[0].xz)
-	l[other_indices[1]] = linalg.length(target_point.xz - normalized_edge_start_points[1].xz)
-
-	sorted: [3]int = {0, 1, 2}
-	if (l[1] < l[0]) {
-		sorted = {1, 0, 2}
-	}
-	if l[2] < l[sorted[0]] {
-		sorted[2] = sorted[1]
-		sorted[1] = sorted[0]
-		sorted[0] = 2
-	} else if l[2] < l[sorted[1]] {
-		sorted[2] = sorted[1]
-		sorted[1] = 2
-	}
-
-	return sorted
 }
 
 intersect_xz :: proc(p1, p2, p3, p4: [2]f32) -> [2]f32 {
