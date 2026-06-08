@@ -1,7 +1,6 @@
 package game
 
 import "core:encoding/json"
-import "core:fmt"
 import "core:os"
 
 playing := false
@@ -221,11 +220,21 @@ PATH_MAX_LENGTH :: 1000
 path_vao: u32
 path_vbo: u32
 
+height_map_filename := "data/height_map.json"
+
 init_state :: proc() {
-	data, read_err := os.read_entire_file("data/height_map.json", context.allocator)
+	data, read_err := os.read_entire_file(height_map_filename, context.allocator)
 	assert(read_err == nil)
 	defer delete(data)
 
 	json_err := json.unmarshal(data, &height_map)
 	assert(json_err == nil)
+}
+
+save_state :: proc() {
+	data, json_err := json.marshal(height_map)
+	assert(json_err == nil)
+
+	write_err := os.write_entire_file(height_map_filename, data)
+	assert(write_err == nil)
 }

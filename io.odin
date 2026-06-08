@@ -25,11 +25,10 @@ init_io :: proc() {
 
 key_callback :: proc "c" (window: glfw.WindowHandle, key, scancode, action, mode: i32) {
 	context = runtime.default_context()
-
 	if mode == glfw.MOD_CONTROL {
 		ctrl_pressed = true
-		if soldier_selected > -1 && key == glfw.KEY_S && action == glfw.PRESS {
-			soldier_fire_at_will = !soldier_fire_at_will
+		if key == glfw.KEY_S && action == glfw.PRESS {
+			save_state()
 		}
 		return
 	}
