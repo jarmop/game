@@ -58,6 +58,7 @@ init_ui :: proc() {
 		context.allocator,
 	)
 	assert(err == nil)
+	defer delete(font_data)
 
 	stbtt.BakeFontBitmap(
 		raw_data(font_data),

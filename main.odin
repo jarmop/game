@@ -24,6 +24,9 @@ main :: proc() {
 
 	fmt.println("Initialized OpenGL")
 
+	init_state()
+	fmt.println("Initialized State")
+
 	init_io()
 	fmt.println("Initialized IO")
 

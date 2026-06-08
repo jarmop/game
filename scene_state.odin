@@ -1,5 +1,9 @@
 package game
 
+import "core:encoding/json"
+import "core:fmt"
+import "core:os"
+
 playing := false
 game_time: f32 = 0
 game_time_delta: f32 = 0.0
@@ -158,7 +162,7 @@ creature_vao: u32
 // soldiers := []Creature{{pos = [3]f32{7.0, 0.0, 7.0}}}
 soldiers := []Creature{{pos = [3]f32{6.0, 0.0, 7.0}}}
 
-soldier_selected := 0
+soldier_selected := -1
 soldier_fire_at_will := false
 soldier_dead := false
 
@@ -216,3 +220,12 @@ PATH_VERTEX_COUNT :: 2
 PATH_MAX_LENGTH :: 1000
 path_vao: u32
 path_vbo: u32
+
+init_state :: proc() {
+	data, read_err := os.read_entire_file("data/height_map.json", context.allocator)
+	assert(read_err == nil)
+	defer delete(data)
+
+	json_err := json.unmarshal(data, &height_map)
+	assert(json_err == nil)
+}
