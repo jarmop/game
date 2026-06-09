@@ -96,25 +96,18 @@ draw_ui :: proc() {
 	PADDING :: 10
 	// Apparently need to multiply FONT_SIZE with a magic number 0.7 to get the correct glyph height
 	GLYPH_HEIGHT_PX :: 0.7 * FONT_SIZE_PX
+	LINE_HEIGHT :: PADDING + GLYPH_HEIGHT_PX
 
-	draw_text(fmt.tprintf("Game time: %.2f", game_time), PADDING, PADDING + GLYPH_HEIGHT_PX)
-	draw_text(fmt.tprintf("Frame rate: %d", frame_rate), PADDING, PADDING + GLYPH_HEIGHT_PX + 20)
-	draw_text(
-		fmt.tprintf("Bullet buffer size: %d", bul_check_next^),
-		PADDING,
-		PADDING + GLYPH_HEIGHT_PX + 40,
-	)
+	draw_text(fmt.tprintf("Game time: %.2f", game_time), PADDING, LINE_HEIGHT)
+	draw_text(fmt.tprintf("Frame rate: %d", frame_rate), PADDING, LINE_HEIGHT + 20)
+	draw_text(fmt.tprintf("Bullet buffer size: %d", bul_check_next^), PADDING, LINE_HEIGHT + 40)
 	draw_text(
 		fmt.tprintf("Camera.pos: %.1f, %.1f, %.1f", camera.pos.x, camera.pos.y, camera.pos.z),
 		PADDING,
-		PADDING + GLYPH_HEIGHT_PX + 60,
+		LINE_HEIGHT + 60,
 	)
-	draw_text(fmt.tprintf("Camera.yaw: %.1f", camera.yaw), PADDING, PADDING + GLYPH_HEIGHT_PX + 80)
-	draw_text(
-		fmt.tprintf("Camera.pitch: %.1f", camera.pitch),
-		PADDING,
-		PADDING + GLYPH_HEIGHT_PX + 100,
-	)
+	draw_text(fmt.tprintf("Camera.yaw: %.1f", camera.yaw), PADDING, LINE_HEIGHT + 80)
+	draw_text(fmt.tprintf("Camera.pitch: %.1f", camera.pitch), PADDING, LINE_HEIGHT + 100)
 	draw_text(
 		fmt.tprintf(
 			"Soldier pos: %.1f, %.1f, %.1f",
@@ -123,7 +116,7 @@ draw_ui :: proc() {
 			soldiers[0].pos.z,
 		),
 		PADDING,
-		PADDING + GLYPH_HEIGHT_PX + 120,
+		LINE_HEIGHT + 120,
 	)
 
 }

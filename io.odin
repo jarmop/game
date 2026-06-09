@@ -293,6 +293,11 @@ drag_on_right_press :: proc(x, y: f64) {
 	}
 
 	camera.yaw += f32((x - prev_cursor_x) * mouse_sensitivity)
+	if (camera.yaw > 180) {
+		camera.yaw -= 360
+	} else if (camera.yaw < -180) {
+		camera.yaw += 360
+	}
 	camera.pitch -= f32((y - prev_cursor_y) * mouse_sensitivity)
 	prev_cursor_x = x
 	prev_cursor_y = y
