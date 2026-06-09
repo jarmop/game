@@ -497,14 +497,14 @@ update_scene :: proc() {
 	game_time_delta = game_time_speed * time_delta
 	game_time += game_time_delta
 
-	// meters per second
-	creature_movement := CREATURE_SPEED * game_time_delta
 
 	// UPDATE SOLDIERS
+	soldier_movement := SOLDIER_SPEED * game_time_delta
+
 	for &s, X in soldiers {
 		if s.path_len > 0 {
 			d := s.target - s.pos
-			if (glsl.length(d) <= creature_movement) {
+			if (glsl.length(d) <= soldier_movement) {
 				s.pos = s.target
 				if s.path_i < s.path_len - 1 {
 					// Target the next waypoint in the path
@@ -516,7 +516,7 @@ update_scene :: proc() {
 					s.path_i = 0
 				}
 			} else {
-				s.pos += creature_movement * glsl.normalize(d)
+				s.pos += soldier_movement * glsl.normalize(d)
 			}
 		}
 		s.bb = {
@@ -529,14 +529,17 @@ update_scene :: proc() {
 	if game_time - enemy_spawn_prev_time > ENEMY_SPAWN_RATE && len(enemies) < ENEMY_COUNT_MAX {
 		spawn_enemy()
 	}
-	for &e, X in enemies {
+
+	enemy_movement := ENEMY_SPEED * game_time_delta
+
+	for &e in enemies {
 		// POSITION
 		if e.pos != e.target {
 			d := e.target - e.pos
-			if (glsl.length(d) <= creature_movement) {
+			if (glsl.length(d) <= enemy_movement) {
 				e.pos = e.target
 			} else {
-				e.pos += creature_movement * glsl.normalize(d)
+				e.pos += enemy_movement * glsl.normalize(d)
 			}
 		}
 		e.bb = {
@@ -551,7 +554,8 @@ update_scene :: proc() {
 			s_direction := glsl.normalize(s.pos - e.pos)
 			s_d := glsl.length(s.pos - e.pos)
 
-			if wall_blocks_ray(e.pos + CREATURE_CENTER, s_direction, s_d) {
+			if wall_blocks_ray(e.pos + CREATURE_CENTER, s_direction, s_d) ||
+			   ground_blocks_ray(e.pos + CREATURE_CENTER, s_direction, s_d) {
 				continue
 			}
 
@@ -583,15 +587,8 @@ update_scene :: proc() {
 				enemy_direction := glsl.normalize(e.pos - s.pos)
 				enemy_sight_d := glsl.length(e.pos - s.pos)
 
-				if wall_blocks_ray(s.pos + CREATURE_CENTER, enemy_direction, enemy_sight_d) {
-					continue
-				}
-
-				ground_d := get_ground_triangle_hit_distance(
-					s.pos + CREATURE_CENTER,
-					enemy_direction,
-				)
-				if ground_d > 0 && ground_d < enemy_sight_d {
+				if wall_blocks_ray(s.pos + CREATURE_CENTER, enemy_direction, enemy_sight_d) ||
+				   ground_blocks_ray(s.pos + CREATURE_CENTER, enemy_direction, enemy_sight_d) {
 					continue
 				}
 

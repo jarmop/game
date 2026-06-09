@@ -3,6 +3,29 @@ package game
 import "core:math"
 import m "core:math/linalg"
 
+wall_blocks_ray :: proc(ray_start: [3]f32, ray_direction: [3]f32, ray_length: f32) -> bool {
+	ray_hits_wall := false
+	for w in walls_x {
+		wall_d := hit_distance(w.bb, ray_start, ray_direction)
+		if wall_d > 0 && wall_d < ray_length {
+			return true
+		}
+	}
+	for w in walls_z {
+		wall_d := hit_distance(w.bb, ray_start, ray_direction)
+		if wall_d > 0 && wall_d < ray_length {
+			return true
+		}
+	}
+
+	return false
+}
+
+ground_blocks_ray :: proc(ray_origin: [3]f32, ray_dir: [3]f32, ray_length: f32) -> bool {
+	ground_d := get_ground_triangle_hit_distance(ray_origin, ray_dir)
+	return ground_d > 0 && ground_d < ray_length
+}
+
 hit_distance :: proc(bb: BoundingBox, ray_start: [3]f32, ray_direction: [3]f32) -> f32 {
 	// Get the distances where the ray enters and exits the bounding box on each axis
 	dmin := (bb.min - ray_start) / ray_direction
@@ -13,6 +36,33 @@ hit_distance :: proc(bb: BoundingBox, ray_start: [3]f32, ray_direction: [3]f32) 
 	d_to_exit := min(max(dmin.x, dmax.x), max(dmin.y, dmax.y), max(dmin.z, dmax.z))
 
 	return d_to_entry if d_to_entry < d_to_exit else 0
+}
+
+
+get_ground_triangle_hit_distance :: proc(ray_origin: [3]f32, ray_dir: [3]f32) -> f32 {
+	triangle_d: f32 = 0
+	triangle_i := 0
+	triangle: [3][3]f32
+	// Get ground triangle hit distance
+	min_t: f32 = math.INF_F32
+	for ti := 0; ti < len(ground_vertices) / 3; ti += 1 {
+		i := ti * 3
+		v0 := ground_vertices[i + 0].pos
+		v1 := ground_vertices[i + 1].pos
+		v2 := ground_vertices[i + 2].pos
+
+		t: f32 = 0
+		if ray_triangle_intersect(ray_origin, ray_dir, v0, v1, v2, &t) {
+			min_t = min(min_t, t)
+			if min_t != triangle_d {
+				triangle_d = min_t
+				triangle_i = ti
+				triangle = {v0, v1, v2}
+			}
+		}
+	}
+
+	return triangle_d
 }
 
 // The smallest possible difference between two floating point numbers that the computer can recognize
@@ -63,33 +113,4 @@ ray_triangle_intersect :: proc(
 	t^ = hit_t
 
 	return true
-}
-
-get_ground_triangle_hit_distance :: proc(
-	ray_origin: [3]f32,
-	ray_dir: [3]f32, // should be normalized
-) -> f32 {
-	triangle_d: f32 = 0
-	triangle_i := 0
-	triangle: [3][3]f32
-	// Get ground triangle hit distance
-	min_t: f32 = math.INF_F32
-	for ti := 0; ti < len(ground_vertices) / 3; ti += 1 {
-		i := ti * 3
-		v0 := ground_vertices[i + 0].pos
-		v1 := ground_vertices[i + 1].pos
-		v2 := ground_vertices[i + 2].pos
-
-		t: f32 = 0
-		if ray_triangle_intersect(ray_origin, ray_dir, v0, v1, v2, &t) {
-			min_t = min(min_t, t)
-			if min_t != triangle_d {
-				triangle_d = min_t
-				triangle_i = ti
-				triangle = {v0, v1, v2}
-			}
-		}
-	}
-
-	return triangle_d
 }

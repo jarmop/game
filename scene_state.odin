@@ -150,7 +150,8 @@ CREATURE_CENTER := CREATURE_DIMENSIONS / 2
 CREATURE_CENTER_XZ :: [3]f32{(CREATURE_DIMENSIONS.x / 2), 0, (CREATURE_DIMENSIONS.z / 2)}
 CREATURE_COLOR :: [3]f32{1.0, 0.6, 0.2}
 CREATURE_COLOR_SELECTED :: [3]f32{0.0, 0.0, 1.0}
-CREATURE_SPEED :: 10
+SOLDIER_SPEED :: 10
+ENEMY_SPEED :: 1
 creature_vao: u32
 
 // -------------- SOLDIER --------------
@@ -162,7 +163,7 @@ soldier := &soldiers[soldier_i]
 
 // soldier_selected := -1
 soldier_selected := soldier_i
-soldier_fire_at_will := true
+soldier_fire_at_will := false
 soldier_dead := false
 
 // -------------- ENEMY --------------
@@ -172,7 +173,7 @@ ENEMY_SPAWN_RATE :: 1
 ENEMY_POSITION: [3]f32 : {14, 0, 12}
 enemies: [dynamic]Creature
 enemy_spawn_prev_time: f32 = 0
-enemy_attack := false
+enemy_attack := true
 
 // -------------- CORPSE --------------
 CORPSE_DIMENSIONS :: [3]f32{1.0, 0.01, 1.0}
