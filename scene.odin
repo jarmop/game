@@ -285,11 +285,12 @@ init_vertices :: proc(vbo: ^u32, vao: ^u32, vertices: rawptr, size: int) {
 }
 
 spawn_enemy :: proc() {
-	pos: [3]f32 = {
-		rand.float32() * (GROUND_SIZE - CREATURE_CENTER.x),
-		0,
-		rand.float32() * (GROUND_SIZE - CREATURE_CENTER.z),
-	}
+	pos: [3]f32 = ENEMY_POSITION
+	// pos: [3]f32 = {
+	// 	rand.float32() * (GROUND_SIZE - CREATURE_CENTER.x),
+	// 	0,
+	// 	rand.float32() * (GROUND_SIZE - CREATURE_CENTER.z),
+	// }
 	append(&enemies, Creature{pos = pos, target = pos})
 	enemy_spawn_prev_time = game_time
 }
@@ -586,6 +587,14 @@ update_scene :: proc() {
 					continue
 				}
 
+				ground_d := get_ground_triangle_hit_distance(
+					s.pos + CREATURE_CENTER,
+					enemy_direction,
+				)
+				if ground_d > 0 && ground_d < enemy_sight_d {
+					continue
+				}
+
 				if nearest_enemy_d == 0 || enemy_sight_d < nearest_enemy_d {
 					nearest_enemy_d = enemy_sight_d
 					enemy = &e
@@ -615,8 +624,8 @@ update_bullets :: proc() {
 	distance_travelled := BULLET_SPEED * game_time_delta
 
 	bullet_path_vertex_next = 0
-	for X := 0; X < bul_check_next^; X += 1 {
-		bullet := bul_check[X]
+	for i := 0; i < bul_check_next^; i += 1 {
+		bullet := bul_check[i]
 		bullet.pos += distance_travelled * bullet.direction
 
 		d: f32 = 0
@@ -634,11 +643,11 @@ update_bullets :: proc() {
 		}
 
 		enemy_hit_index := -1
-		for e, X in enemies {
+		for e, i in enemies {
 			bb_d := hit_distance(e.bb, bullet.pos_prev_check, bullet.direction)
 			if bb_d > 0 && (d == 0 || bb_d < d) {
 				d = bb_d
-				enemy_hit_index = X
+				enemy_hit_index = i
 			}
 		}
 
@@ -686,5 +695,4 @@ update_bullets :: proc() {
 	bul_check = &bullet_buffers[(bullet_buffer_index + 1) % BULLET_BUFFERS_MAX]
 	bul_check_next = &bullet_nexts[(bullet_buffer_index + 1) % BULLET_BUFFERS_MAX]
 	bul_fill_next^ = 0
-	// }
 }

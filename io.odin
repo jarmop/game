@@ -108,27 +108,7 @@ mouse_button_callback :: proc "c" (window: glfw.WindowHandle, button, action, mo
 				return
 			}
 
-			triangle_d: f32 = 0
-			triangle_i := 0
-			triangle: [3][3]f32
-			// Get ground triangle hit distance
-			min_t: f32 = m.INF_F32
-			for ti := 0; ti < len(ground_vertices) / 3; ti += 1 {
-				i := ti * 3
-				v0 := ground_vertices[i + 0].pos
-				v1 := ground_vertices[i + 1].pos
-				v2 := ground_vertices[i + 2].pos
-
-				t: f32 = 0
-				if ray_triangle_intersect(camera.pos, ray_world, v0, v1, v2, &t) {
-					min_t = min(min_t, t)
-					if min_t != triangle_d {
-						triangle_d = min_t
-						triangle_i = ti
-						triangle = {v0, v1, v2}
-					}
-				}
-			}
+			triangle_d := get_ground_triangle_hit_distance(camera.pos, ray_world)
 
 			// Check hit on ground
 			if (triangle_d > 0) {
@@ -217,27 +197,7 @@ hover :: proc(x, y: f64) {
 		view := l.matrix4_look_at_f32(camera.pos, camera.pos + camera.front, camera.up)
 		ray_world := l.normalize((l.inverse(view) * ray_eye).xyz)
 
-		triangle_d: f32 = 0
-		triangle_i := 0
-		triangle: [3][3]f32
-		// Get ground triangle hit distance
-		min_t: f32 = m.INF_F32
-		for ti := 0; ti < len(ground_vertices) / 3; ti += 1 {
-			i := ti * 3
-			v0 := ground_vertices[i + 0].pos
-			v1 := ground_vertices[i + 1].pos
-			v2 := ground_vertices[i + 2].pos
-
-			t: f32 = 0
-			if ray_triangle_intersect(camera.pos, ray_world, v0, v1, v2, &t) {
-				min_t = min(min_t, t)
-				if min_t != triangle_d {
-					triangle_d = min_t
-					triangle_i = ti
-					triangle = {v0, v1, v2}
-				}
-			}
-		}
+		triangle_d := get_ground_triangle_hit_distance(camera.pos, ray_world)
 
 		if (triangle_d > 0) {
 			// Update height_map_pos
