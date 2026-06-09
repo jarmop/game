@@ -1,6 +1,7 @@
 package game
 
 import "core:encoding/json"
+import "core:fmt"
 import "core:os"
 
 playing := false
@@ -156,14 +157,13 @@ creature_vao: u32
 
 // -------------- SOLDIER --------------
 
-// soldiers := []Creature{{pos = [3]f32{6.0, 0.0, 6.0}}}
-// soldiers := []Creature{{pos = [3]f32{7.0, 0.0, 6.0}}}
-// soldiers := []Creature{{pos = [3]f32{7.0, 0.0, 7.0}}}
-// soldiers := []Creature{{pos = [3]f32{6.0, 0.0, 7.0}}}
+
 soldiers := []Creature{{pos = [3]f32{9.0, 3.4, 14.0}}}
+soldier_i := 0
+soldier := &soldiers[soldier_i]
 
 // soldier_selected := -1
-soldier_selected := 0
+soldier_selected := soldier_i
 soldier_fire_at_will := false
 soldier_dead := false
 
@@ -223,22 +223,72 @@ path_vao: u32
 path_vbo: u32
 
 height_map_filename := "data/height_map.json"
+state_filename := "data/state.json"
+
+PersistedState :: struct {
+	soldier_pos: [3]f32,
+	camera:      struct {
+		pos:   [3]f32,
+		yaw:   f32,
+		pitch: f32,
+	},
+}
 
 init_state :: proc() {
 	data, read_err := os.read_entire_file(height_map_filename, context.allocator)
-	assert(read_err == nil)
+	if (read_err != nil) {
+		fmt.println(read_err)
+	}
 	defer delete(data)
 
 	json_err := json.unmarshal(data, &height_map)
-	assert(json_err == nil)
+	if (json_err != nil) {
+		fmt.println(json_err)
+	}
 
 	height_map_pos.y = height_map[int(height_map_pos.z)][int(height_map_pos.x)]
+
+	data, read_err = os.read_entire_file(state_filename, context.allocator)
+	if (read_err != nil) {
+		fmt.println(read_err)
+	}
+
+	state: PersistedState
+	json_err = json.unmarshal(data, &state)
+	if (json_err != nil) {
+		fmt.println(json_err)
+	}
+
+	soldier.pos = state.soldier_pos
+	camera.pos = state.camera.pos
+	camera.yaw = state.camera.yaw
+	camera.pitch = state.camera.pitch
 }
 
 save_state :: proc() {
 	data, json_err := json.marshal(height_map)
-	assert(json_err == nil)
+	if (json_err != nil) {
+		fmt.println(json_err)
+	}
 
 	write_err := os.write_entire_file(height_map_filename, data)
-	assert(write_err == nil)
+	if (write_err != nil) {
+		fmt.println(write_err)
+	}
+
+	state: PersistedState
+	state.soldier_pos = soldier.pos
+	state.camera.pos = camera.pos
+	state.camera.yaw = camera.yaw
+	state.camera.pitch = camera.pitch
+
+	data, json_err = json.marshal(state)
+	if (json_err != nil) {
+		fmt.println(json_err)
+	}
+
+	write_err = os.write_entire_file(state_filename, data)
+	if (write_err != nil) {
+		fmt.println(write_err)
+	}
 }

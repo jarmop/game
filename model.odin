@@ -126,8 +126,7 @@ get_center_y :: proc(top_left, top_right, bottom_left, bottom_right: f32) -> f32
 	// 	   top_right.pos.y + bottom_right.pos.y == foo) {
 	// 	center.pos.y = y / 2
 	// }
-	// if top_left != 0 {
-	// fmt.println(abs(bottom_left - top_right) < 0.01)
+
 	diagonal1_equal := abs(top_left - bottom_right) < 0.01
 	diagonal2_equal := abs(bottom_left - top_right) < 0.01
 
@@ -140,8 +139,6 @@ get_center_y :: proc(top_left, top_right, bottom_left, bottom_right: f32) -> f32
 	if diagonal2_equal {
 		return top_right
 	}
-	// }
-
 
 	return min(top_left + bottom_right, bottom_left + top_right) / 2
 	// return min(top_left, bottom_right, bottom_left, top_right)
