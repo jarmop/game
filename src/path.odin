@@ -315,22 +315,28 @@ get_intersection_y :: proc(p0, p1: [3]f32, pi_xz: [2]f32) -> [3]f32 {
 	return p
 }
 
-update_path :: proc(s: ^Creature, movement: f32) {
+update_path :: proc(s: ^Creature, total_movement: f32) {
 	if s.path_len > 0 {
-		d := s.target - s.pos
-		if (linalg.length(d) <= movement) {
+		movement := total_movement
+		target_v := s.target - s.pos
+		target_d := linalg.length(target_v)
+		for movement >= target_d {
 			s.pos = s.target
 			if s.path_i < s.path_len - 1 {
 				// Target the next waypoint in the path
+				movement -= target_d
 				s.path_i += 1
 				s.target = s.path[s.path_i]
+				target_v = s.target - s.pos
+				target_d = linalg.length(target_v)
 			} else {
 				// Path is finished
+				movement = 0
 				s.path_len = 0
 				s.path_i = 0
 			}
-		} else {
-			s.pos += movement * linalg.normalize(d)
 		}
+
+		s.pos += movement * linalg.normalize(target_v)
 	}
 }

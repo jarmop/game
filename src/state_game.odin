@@ -1,10 +1,9 @@
 package game
 
-playing := false
-game_time: f32 = 0
+playing := true
+game_time: f32 = 0.0
 game_time_delta: f32 = 0.0
-game_time_speed: f32 = 1
-
+game_time_speed: f32 = 1.0
 
 // -------------- CREATURE --------------
 
@@ -13,22 +12,21 @@ CREATURE_CENTER := CREATURE_DIMENSIONS / 2
 CREATURE_CENTER_XZ :: [3]f32{(CREATURE_DIMENSIONS.x / 2), 0, (CREATURE_DIMENSIONS.z / 2)}
 CREATURE_COLOR :: [3]f32{1.0, 0.6, 0.2}
 CREATURE_COLOR_SELECTED :: [3]f32{0.0, 0.0, 1.0}
-SOLDIER_SPEED :: 100
-ENEMY_SPEED :: 1
 creature_vao: u32
 
 // -------------- SOLDIER --------------
-
+SOLDIER_SPEED :: 100
 soldiers := []Creature{{pos = [3]f32{9.0, 3.4, 14.0}}}
 soldier_i := 0
 soldier := &soldiers[soldier_i]
 
-soldier_selected := -1
-// soldier_selected := soldier_i
+// soldier_selected := -1
+soldier_selected := soldier_i
 soldier_fire_at_will := false
 soldier_dead := false
 
 // -------------- ENEMY --------------
+ENEMY_SPEED :: 1
 ENEMY_COUNT_INITIAL :: 0
 ENEMY_COUNT_MAX :: 0
 ENEMY_SPAWN_RATE :: 1
