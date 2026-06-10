@@ -117,7 +117,7 @@ mouse_button_callback :: proc "c" (window: glfw.WindowHandle, button, action, mo
 					// Create path for the selected soldier
 					target := entry_point - CREATURE_CENTER_XZ
 
-					soldier := soldiers[soldier_selected]
+					soldier := &soldiers[soldier_selected]
 
 					target_direction := l.normalize(target - soldier.pos)
 					target_d := l.length(target - soldier.pos)
@@ -132,7 +132,7 @@ mouse_button_callback :: proc "c" (window: glfw.WindowHandle, button, action, mo
 						start_triangle := get_triangle(soldier.pos)
 
 						end_triangle := get_triangle(entry_point)
-						funnel(soldier.pos, entry_point, start_triangle, end_triangle)
+						funnel(soldier.pos, entry_point, start_triangle, end_triangle, soldier)
 
 						// // This entry point provides a tricky corner case if
 						// // used with soldier position "6.0, 0.0, 7.0"

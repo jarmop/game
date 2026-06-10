@@ -4,7 +4,7 @@ import "core:encoding/json"
 import "core:fmt"
 import "core:os"
 
-playing := false
+playing := true
 game_time: f32 = 0
 game_time_delta: f32 = 0.0
 game_time_speed: f32 = 1
@@ -98,6 +98,8 @@ GROUND_DIMENSIONS :: [3]f32{GROUND_SIZE, 0.01, GROUND_SIZE}
 GROUND_POSITION :: [3]f32{0.0, -GROUND_DIMENSIONS.y, 0.0}
 // SHOW_GROUND_WIREFRAME :: false
 SHOW_GROUND_WIREFRAME :: true
+SHOW_GROUND_TEXTURE :: false
+// SHOW_GROUND_TEXTURE :: true
 
 // GROUND_BB := BoundingBox {
 // 	min = GROUND_POSITION,
@@ -156,7 +158,6 @@ creature_vao: u32
 
 // -------------- SOLDIER --------------
 
-
 soldiers := []Creature{{pos = [3]f32{9.0, 3.4, 14.0}}}
 soldier_i := 0
 soldier := &soldiers[soldier_i]
@@ -170,7 +171,8 @@ soldier_dead := false
 ENEMY_COUNT_INITIAL :: 1
 ENEMY_COUNT_MAX :: 1
 ENEMY_SPAWN_RATE :: 1
-ENEMY_POSITION: [3]f32 : {14, 0, 12}
+ENEMY_UPDATE_DELAY :: 2
+ENEMY_POSITION: [3]f32 : {1, 0, 1}
 enemies: [dynamic]Creature
 enemy_spawn_prev_time: f32 = 0
 enemy_attack := true
@@ -266,6 +268,8 @@ init_state :: proc() {
 }
 
 save_state :: proc() {
+	// empty_map: [GRID_SIZE + 1][GRID_SIZE + 1]f32
+	// data, json_err := json.marshal(empty_map)
 	data, json_err := json.marshal(height_map)
 	if (json_err != nil) {
 		fmt.println(json_err)

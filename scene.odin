@@ -2,7 +2,6 @@ package game
 
 import "core:fmt"
 import "core:math/linalg/glsl"
-import "core:math/rand"
 import "core:os"
 import gl "vendor:OpenGL"
 import "vendor:glfw"
@@ -316,7 +315,14 @@ draw_scene :: proc() {
 	w_bg: f32 = 1.0
 	w_line: f32 = 0.0
 
-	if (SHOW_GROUND_WIREFRAME) {
+	if SHOW_GROUND_TEXTURE {
+		use_texture_shader(view, projection)
+		gl.BindTexture(gl.TEXTURE_2D, scene_texture)
+		shader_set_mat4(texture_shader_program, "model", model)
+		shader_set_vec3(texture_shader_program, "color", {1.0, 1.0, 1.0})
+		gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
+		gl.DrawArrays(gl.TRIANGLES, 0, GRID_SIZE * GRID_SIZE * 12)
+	} else {
 		// BACKGROUND FOR THE WIREFRAME
 		use_color_shader(view, projection)
 		shader_set_mat4(color_shader_program, "model", model)
@@ -329,27 +335,22 @@ draw_scene :: proc() {
 		gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 		gl.DrawArrays(gl.TRIANGLES, 0, GRID_SIZE * GRID_SIZE * 12)
 
-		// tHE WIREFRAME
-		// Lift grid up from the texture to make sure it's fully visible
-		// // gl.BindVertexArray(ground_vao_grid)
-		// model *= glsl.mat4Translate({0, 0.001, 0})
-		// shader_set_mat4(color_shader_program, "model", model)
-		// shader_set_vec3(color_shader_program, "color", {w_line, w_line, w_line})
-		// // shader_set_vec3(color_shader_program, "color", {0.0, 0.0, 0.0})
-		// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
-		// gl.LineWidth(2.0)
-		// gl.DrawArrays(gl.TRIANGLES, 0, GRID_SIZE * GRID_SIZE * 12)
-		// // gl.DrawArrays(gl.LINES, 0, GRID_SIZE * GRID_SIZE * 12)
-		// // gl.DrawArrays(gl.LINE_STRIP, 0, GRID_SIZE * GRID_SIZE * 12)
-		// // gl.DrawArrays(gl.LINE_STRIP_ADJACENCY, 0, GRID_SIZE * GRID_SIZE * 12)
-		// gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
-	} else {
-		use_texture_shader(view, projection)
-		gl.BindTexture(gl.TEXTURE_2D, scene_texture)
-		shader_set_mat4(texture_shader_program, "model", model)
-		shader_set_vec3(texture_shader_program, "color", {1.0, 1.0, 1.0})
-		gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
-		gl.DrawArrays(gl.TRIANGLES, 0, GRID_SIZE * GRID_SIZE * 12)
+		if SHOW_GROUND_WIREFRAME {
+			// tHE WIREFRAME
+			// Lift grid up from the texture to make sure it's fully visible
+			// gl.BindVertexArray(ground_vao_grid)
+			model *= glsl.mat4Translate({0, 0.001, 0})
+			shader_set_mat4(color_shader_program, "model", model)
+			shader_set_vec3(color_shader_program, "color", {w_line, w_line, w_line})
+			// shader_set_vec3(color_shader_program, "color", {0.0, 0.0, 0.0})
+			gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+			gl.LineWidth(2.0)
+			gl.DrawArrays(gl.TRIANGLES, 0, GRID_SIZE * GRID_SIZE * 12)
+			// gl.DrawArrays(gl.LINES, 0, GRID_SIZE * GRID_SIZE * 12)
+			// gl.DrawArrays(gl.LINE_STRIP, 0, GRID_SIZE * GRID_SIZE * 12)
+			// gl.DrawArrays(gl.LINE_STRIP_ADJACENCY, 0, GRID_SIZE * GRID_SIZE * 12)
+			gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
+		}
 	}
 
 	// WALL
@@ -375,10 +376,10 @@ draw_scene :: proc() {
 	// SOLDIER
 	// use_texture_shader(view, projection, creature_texture)
 	use_color_shader(view, projection)
-	for c, X in soldiers {
+	for c, i in soldiers {
 		draw_object(
 			c.pos,
-			get_soldier_color(X),
+			get_soldier_color(i),
 			// {1.0, 1.0, 1.0},
 			&creature_vao,
 			color_shader_program,
@@ -388,13 +389,13 @@ draw_scene :: proc() {
 	// ENEMY
 	// use_texture_shader(view, projection, creature_texture)
 	use_color_shader(view, projection)
-	for c, X in enemies {
+	for c in enemies {
 		draw_object(c.pos, {0.0, 1.0, 0.0}, &creature_vao, color_shader_program)
 	}
 
 	// CORPSE
 	use_color_shader(view, projection)
-	for pos, X in corpses {
+	for pos in corpses {
 		draw_object(pos, {0.5, 0.0, 0.0}, &corpse_vao, color_shader_program)
 	}
 
@@ -417,37 +418,11 @@ draw_scene :: proc() {
 	gl.DrawArrays(gl.LINES, 0, i32(bullet_path_vertex_next))
 
 	// PATH
-	for s, X in soldiers {
-		if s.path_len > 0 {
-			gl.UseProgram(path_shader_program)
-			shader_set_mat4(path_shader_program, "view", view)
-			shader_set_mat4(path_shader_program, "projection", projection)
-			shader_set_mat4(path_shader_program, "model", 1)
-			shader_set_vec3(path_shader_program, "color", PATH_COLOR)
-			gl.BindVertexArray(path_vao)
-			gl.BindBuffer(gl.ARRAY_BUFFER, path_vbo)
-			path_vertices: [PATH_MAX_LENGTH + 1]Vertex
-			path_vertices[0] = {
-				pos = s.pos,
-			}
-			vi := 1
-			for X := s.path_i; X < s.path_len; X += 1 {
-				path_vertices[vi] = {
-					pos = s.path[X],
-				}
-				vi += 1
-			}
-			gl.BufferData(
-				gl.ARRAY_BUFFER,
-				len(path_vertices) * size_of(Vertex),
-				// raw_data(path_vertices[0:4]),
-				raw_data(path_vertices[0:s.path_len]),
-				gl.STATIC_DRAW,
-			)
-			gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
-			gl.LineWidth(PATH_WIDTH)
-			gl.DrawArrays(gl.LINE_STRIP, 0, i32(s.path_len + 1 - s.path_i))
-		}
+	for s in soldiers {
+		draw_path(s, view, projection)
+	}
+	for e in enemies {
+		draw_path(e, view, projection)
 	}
 
 	// HEIGHT_MAP
@@ -459,16 +434,42 @@ draw_scene :: proc() {
 	shader_set_mat4(line_shader_program, "model", model)
 	shader_set_vec3(line_shader_program, "color", {1.0, 0.0, 0.0})
 	gl.BindVertexArray(height_map_vao)
-	// gl.BindBuffer(gl.ARRAY_BUFFER, bullet_path_vbo)
-	// gl.BufferData(
-	// 	gl.ARRAY_BUFFER,
-	// 	bullet_path_vertex_next * size_of(BulletVertex),
-	// 	raw_data(&bullet_path_vertices),
-	// 	gl.STATIC_DRAW,
-	// )
 	gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 	gl.LineWidth(3.0)
 	gl.DrawArrays(gl.LINES, 0, 4)
+}
+
+draw_path :: proc(c: Creature, view: glsl.mat4, projection: glsl.mat4) {
+	if c.path_len > 0 {
+		gl.UseProgram(path_shader_program)
+		shader_set_mat4(path_shader_program, "view", view)
+		shader_set_mat4(path_shader_program, "projection", projection)
+		shader_set_mat4(path_shader_program, "model", 1)
+		shader_set_vec3(path_shader_program, "color", PATH_COLOR)
+		gl.BindVertexArray(path_vao)
+		gl.BindBuffer(gl.ARRAY_BUFFER, path_vbo)
+		path_vertices: [PATH_MAX_LENGTH + 1]Vertex
+		path_vertices[0] = {
+			pos = c.pos,
+		}
+		vi := 1
+		for x := c.path_i; x < c.path_len; x += 1 {
+			path_vertices[vi] = {
+				pos = c.path[x],
+			}
+			vi += 1
+		}
+		gl.BufferData(
+			gl.ARRAY_BUFFER,
+			len(path_vertices) * size_of(Vertex),
+			// raw_data(path_vertices[0:4]),
+			raw_data(path_vertices[0:c.path_len]),
+			gl.STATIC_DRAW,
+		)
+		gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+		gl.LineWidth(PATH_WIDTH)
+		gl.DrawArrays(gl.LINE_STRIP, 0, i32(c.path_len + 1 - c.path_i))
+	}
 }
 
 get_soldier_color :: proc(X: int) -> glsl.vec3 {
@@ -501,24 +502,8 @@ update_scene :: proc() {
 	// UPDATE SOLDIERS
 	soldier_movement := SOLDIER_SPEED * game_time_delta
 
-	for &s, X in soldiers {
-		if s.path_len > 0 {
-			d := s.target - s.pos
-			if (glsl.length(d) <= soldier_movement) {
-				s.pos = s.target
-				if s.path_i < s.path_len - 1 {
-					// Target the next waypoint in the path
-					s.path_i += 1
-					s.target = s.path[s.path_i]
-				} else {
-					// Path is finished
-					s.path_len = 0
-					s.path_i = 0
-				}
-			} else {
-				s.pos += soldier_movement * glsl.normalize(d)
-			}
-		}
+	for &s in soldiers {
+		update_path(&s, soldier_movement)
 		s.bb = {
 			min = s.pos,
 			max = s.pos + CREATURE_DIMENSIONS,
@@ -533,15 +518,13 @@ update_scene :: proc() {
 	enemy_movement := ENEMY_SPEED * game_time_delta
 
 	for &e in enemies {
-		// POSITION
-		if e.pos != e.target {
-			d := e.target - e.pos
-			if (glsl.length(d) <= enemy_movement) {
-				e.pos = e.target
-			} else {
-				e.pos += enemy_movement * glsl.normalize(d)
-			}
+		update_path(&e, enemy_movement)
+
+		if (e.time_updated + ENEMY_UPDATE_DELAY > game_time) {
+			continue
 		}
+		e.time_updated = game_time
+
 		e.bb = {
 			min = e.pos,
 			max = e.pos + CREATURE_DIMENSIONS,
@@ -572,7 +555,14 @@ update_scene :: proc() {
 				playing = false
 			}
 			if enemy_attack {
-				e.target = soldier.pos
+				// fmt.println("################## Enemy path ################")
+				target := soldier.pos
+				target_direction := glsl.normalize(target - e.pos)
+				target_d := glsl.length(target - e.pos)
+				start_triangle := get_triangle(e.pos)
+				end_triangle := get_triangle(target)
+				funnel(e.pos, target, start_triangle, end_triangle, &e)
+				// fmt.println("##################################")
 			}
 		}
 	}

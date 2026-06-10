@@ -115,7 +115,12 @@ get_triangle :: proc(p: [3]f32) -> ^Triangle {
 	return triangle
 }
 
-funnel :: proc(start, end: [3]f32, triangle: ^Triangle, end_triangle: ^Triangle) {
+funnel :: proc(
+	start, end: [3]f32,
+	triangle: ^Triangle,
+	end_triangle: ^Triangle,
+	creature: ^Creature,
+) {
 	// fmt.println("########################")
 	start_triangle := triangle
 	// fmt.println("start:", start)
@@ -123,12 +128,13 @@ funnel :: proc(start, end: [3]f32, triangle: ^Triangle, end_triangle: ^Triangle)
 	// fmt.println("start_triangle", start_triangle.corners)
 	// fmt.println("end_triangle:", end_triangle.corners)
 
-	soldiers[0].path_i = 0
-	soldiers[0].path_len = 0
+	creature.path_i = 0
+	creature.path_len = 0
 
 	start_waypoint := start
 	entrance_edge: [2][3]f32
 	for i := 0; start_triangle != nil && i < PATH_MAX_LENGTH; i += 1 {
+		// for i := 0; start_triangle != nil && i < 10; i += 1 {
 		// fmt.println("------------- loop", i, "-------------")
 
 		// If the distance from the start of the waypoint to the corner nearest to the end is longer
@@ -136,8 +142,8 @@ funnel :: proc(start, end: [3]f32, triangle: ^Triangle, end_triangle: ^Triangle)
 		if end_triangle.corners == start_triangle.corners {
 			// fmt.println("finish the path")
 
-			soldiers[0].path[i] = end
-			soldiers[0].path_len += 1
+			creature.path[i] = end
+			creature.path_len += 1
 			break
 		}
 
@@ -206,8 +212,8 @@ funnel :: proc(start, end: [3]f32, triangle: ^Triangle, end_triangle: ^Triangle)
 
 		p := get_intersection_y(p0, p1, pi_xz)
 
-		soldiers[0].path[i] = p
-		soldiers[0].path_len += 1
+		creature.path[i] = p
+		creature.path_len += 1
 
 		start_triangle = next_triangle
 
@@ -215,7 +221,7 @@ funnel :: proc(start, end: [3]f32, triangle: ^Triangle, end_triangle: ^Triangle)
 		entrance_edge = {p0, p1}
 
 		// if (i < 10) {
-		// if (i == 3 || i == 4) {
+		// if (i == 0) {
 		// 	fmt.println("------------- loop", i, "-------------")
 		// 	fmt.println("sorted", sorted)
 		// 	fmt.println("p1:", p1)
@@ -230,13 +236,13 @@ funnel :: proc(start, end: [3]f32, triangle: ^Triangle, end_triangle: ^Triangle)
 		// }
 	}
 	// fmt.println("----- Path created -----")
-	// fmt.println("Path (max 10):", soldiers[0].path[0:min(soldiers[0].path_len, 10)])
+	// fmt.println("Path (max 10):", creature.path[0:min(creature.path_len, 10)])
 	// fmt.println("start_triangle.corners:", start_triangle.corners)
-	// fmt.println("Path length:", soldiers[0].path_len)
-	// fmt.println("path_i:", soldiers[0].path_i)
+	// fmt.println("Path length:", creature.path_len)
+	// fmt.println("path_i:", creature.path_i)
 
-	soldiers[0].path_i = 0
-	soldiers[0].target = soldiers[0].path[0]
+	creature.path_i = 0
+	creature.target = creature.path[0]
 }
 
 // 1. The corner that is closest to the target
@@ -307,4 +313,24 @@ get_intersection_y :: proc(p0, p1: [3]f32, pi_xz: [2]f32) -> [3]f32 {
 	p := [3]f32{pi_xz.x, p0.y + y, pi_xz[1]}
 
 	return p
+}
+
+update_path :: proc(s: ^Creature, movement: f32) {
+	if s.path_len > 0 {
+		d := s.target - s.pos
+		if (linalg.length(d) <= movement) {
+			s.pos = s.target
+			if s.path_i < s.path_len - 1 {
+				// Target the next waypoint in the path
+				s.path_i += 1
+				s.target = s.path[s.path_i]
+			} else {
+				// Path is finished
+				s.path_len = 0
+				s.path_i = 0
+			}
+		} else {
+			s.pos += movement * linalg.normalize(d)
+		}
+	}
 }

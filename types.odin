@@ -6,12 +6,13 @@ BoundingBox :: struct {
 }
 
 Creature :: struct {
-	pos:      [3]f32,
-	target:   [3]f32,
-	path_len: int,
-	path_i:   int,
-	path:     [PATH_MAX_LENGTH][3]f32,
-	bb:       BoundingBox,
+	pos:          [3]f32,
+	target:       [3]f32,
+	path_len:     int,
+	path_i:       int,
+	path:         [PATH_MAX_LENGTH][3]f32,
+	bb:           BoundingBox,
+	time_updated: f32, // seconds since game started. Update time even if path is not created
 }
 
 Wall :: struct {
