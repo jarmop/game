@@ -1,6 +1,6 @@
 package game
 
-playing := true
+playing := false
 game_time: f32 = 0.0
 game_time_delta: f32 = 0.0
 game_time_speed: f32 = 1.0
@@ -16,7 +16,7 @@ creature_vao: u32
 
 // -------------- SOLDIER --------------
 SOLDIER_SPEED :: 100
-soldiers := []Creature{{pos = [3]f32{9.0, 3.4, 14.0}}}
+soldiers := []Creature{{pos = [3]f32{0.0, 0.0, 0.0}}}
 soldier_i := 0
 soldier := &soldiers[soldier_i]
 

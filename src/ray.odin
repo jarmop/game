@@ -1,5 +1,6 @@
 package game
 
+import "core:fmt"
 import "core:math"
 import m "core:math/linalg"
 
@@ -38,8 +39,70 @@ hit_distance :: proc(bb: BoundingBox, ray_start: [3]f32, ray_direction: [3]f32) 
 	return d_to_entry if d_to_entry < d_to_exit else 0
 }
 
-
+// Find the cell or some other smaller set of triangles before searching to triangles
 get_ground_triangle_hit_distance :: proc(ray_origin: [3]f32, ray_dir: [3]f32) -> f32 {
+	// fmt.println("-----------")
+	grid_size := GRID_SIZE
+	// fmt.println(height_map)
+
+	return get_triangle_d(0, 0, grid_size, ray_origin, ray_dir)
+}
+
+min_grid_size := 1
+
+get_triangle_d :: proc(
+	x0: int,
+	z0: int,
+	grid_size: int,
+	ray_origin: [3]f32,
+	ray_dir: [3]f32,
+) -> f32 {
+	// fmt.println("------- get_triangle ------")
+	// fmt.println("x:", x0, "| z:", z0, "| grid_size:", grid_size)
+
+	min_d: f32 = 0
+	if grid_size == min_grid_size {
+		// get triangle
+		// fmt.println("found triangle", x0, z0)
+		// fmt.println("found triangle at cell", z0 * GRID_SIZE + x0)
+		cell_i := z0 * GRID_SIZE * VERTICES_PER_CELL + x0 * VERTICES_PER_CELL
+		return get_foo(ray_origin, ray_dir, ground_vertices[cell_i:cell_i + VERTICES_PER_CELL])
+	}
+
+	bb_size := grid_size / 2
+	for z := z0; z < z0 + grid_size; z += bb_size {
+		for x := x0; x < x0 + grid_size; x += bb_size {
+			min_y := math.INF_F32
+			max_y := -math.INF_F32
+			for i := z; i < z + bb_size + 1; i += 1 {
+				for j := x; j < x + bb_size + 1; j += 1 {
+					y := height_map[i][j]
+					if y > max_y {
+						max_y = y
+					}
+					if y < min_y {
+						min_y = y
+					}
+				}
+			}
+			bb: BoundingBox = {
+				min = {f32(x), min_y, f32(z)},
+				max = {f32(x + bb_size), max(max_y, min_y + 0.001), f32(z + bb_size)},
+			}
+			bb_d := hit_distance(bb, ray_origin, ray_dir)
+			if bb_d > 0 {
+				triangle_d := get_triangle_d(x, z, grid_size / 2, ray_origin, ray_dir)
+				if (triangle_d > 0 && (min_d == 0 || triangle_d < min_d)) {
+					min_d = triangle_d
+				}
+			}
+		}
+	}
+
+	return min_d
+}
+
+get_foo :: proc(ray_origin: [3]f32, ray_dir: [3]f32, ground_vertices: []Vertex) -> f32 {
 	triangle_d: f32 = 0
 	triangle_i := 0
 	triangle: [3][3]f32
@@ -53,7 +116,9 @@ get_ground_triangle_hit_distance :: proc(ray_origin: [3]f32, ray_dir: [3]f32) ->
 
 		t: f32 = 0
 		if ray_triangle_intersect(ray_origin, ray_dir, v0, v1, v2, &t) {
+
 			min_t = min(min_t, t)
+
 			if min_t != triangle_d {
 				triangle_d = min_t
 				triangle_i = ti

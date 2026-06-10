@@ -35,11 +35,11 @@ package game
 // 	{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
 // }
 
-GRID_SIZE :: 100
+GRID_SIZE :: 4
 height_map: [GRID_SIZE + 1][GRID_SIZE + 1]f32
 empty_map: [GRID_SIZE + 1][GRID_SIZE + 1]f32
 height_map_vao: u32
-height_map_pos: [3]f32 = {5, height_map[5][8], 8}
+height_map_pos: [3]f32 = {1, height_map[1][1], 1}
 
 CELL_SIZE :: 1.0
 GROUND_SIZE :: GRID_SIZE * CELL_SIZE
