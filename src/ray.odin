@@ -1,5 +1,6 @@
 package game
 
+import "core:fmt"
 import "core:math"
 import m "core:math/linalg"
 
@@ -65,8 +66,7 @@ get_triangle_d_recursive :: proc(
 	for z := z0; z < z0 + grid_size; z += bb_size {
 		for x := x0; x < x0 + grid_size; x += bb_size {
 			bb := get_bb_from_cache(x, z, bb_size)
-			bb_d := hit_distance(bb, ray_origin, ray_dir)
-			if bb_d > 0 {
+			if point_inside_bb(ray_origin, bb) || hit_distance(bb, ray_origin, ray_dir) > 0 {
 				triangle_d := get_triangle_d_recursive(x, z, grid_size / 2, ray_origin, ray_dir)
 				if (triangle_d > 0 && (min_d == 0 || triangle_d < min_d)) {
 					min_d = triangle_d
@@ -207,4 +207,15 @@ get_bb_from_cache :: proc(x: int, z: int, bb_size: int) -> BoundingBox {
 	ground_bb_cache[bb_cache_i] = bb
 
 	return bb
+}
+
+point_inside_bb :: proc(p: [3]f32, bb: BoundingBox) -> bool {
+	return(
+		p.x >= bb.min.x &&
+		p.x <= bb.max.x &&
+		p.y >= bb.min.y &&
+		p.y <= bb.max.y &&
+		p.z >= bb.min.z &&
+		p.z <= bb.max.z \
+	)
 }
