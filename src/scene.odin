@@ -132,6 +132,9 @@ init_scene :: proc() {
 
 	update_pathfinding_data()
 
+	// create_ground_bounding_boxes()
+
+
 	// WALL
 	wall_x_vbo: u32
 	wall_x_vertices: [CUBOID_VERTEX_COUNT]Vertex

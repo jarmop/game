@@ -1,6 +1,5 @@
 package game
 
-import "core:fmt"
 import "core:math"
 import m "core:math/linalg"
 
@@ -42,56 +41,33 @@ hit_distance :: proc(bb: BoundingBox, ray_start: [3]f32, ray_direction: [3]f32) 
 // Find the cell or some other smaller set of triangles before searching to triangles
 get_ground_triangle_hit_distance :: proc(ray_origin: [3]f32, ray_dir: [3]f32) -> f32 {
 	// fmt.println("-----------")
-	grid_size := GRID_SIZE
-	// fmt.println(height_map)
-
-	return get_triangle_d(0, 0, grid_size, ray_origin, ray_dir)
+	return get_triangle_d_recursive(0, 0, GRID_SIZE, ray_origin, ray_dir)
 }
 
-min_grid_size := 1
-
-get_triangle_d :: proc(
+get_triangle_d_recursive :: proc(
 	x0: int,
 	z0: int,
 	grid_size: int,
 	ray_origin: [3]f32,
 	ray_dir: [3]f32,
 ) -> f32 {
-	// fmt.println("------- get_triangle ------")
-	// fmt.println("x:", x0, "| z:", z0, "| grid_size:", grid_size)
-
 	min_d: f32 = 0
-	if grid_size == min_grid_size {
-		// get triangle
-		// fmt.println("found triangle", x0, z0)
-		// fmt.println("found triangle at cell", z0 * GRID_SIZE + x0)
+	if grid_size == 1 {
 		cell_i := z0 * GRID_SIZE * VERTICES_PER_CELL + x0 * VERTICES_PER_CELL
-		return get_foo(ray_origin, ray_dir, ground_vertices[cell_i:cell_i + VERTICES_PER_CELL])
+		return get_triangle_d(
+			ray_origin,
+			ray_dir,
+			ground_vertices[cell_i:cell_i + VERTICES_PER_CELL],
+		)
 	}
 
 	bb_size := grid_size / 2
 	for z := z0; z < z0 + grid_size; z += bb_size {
 		for x := x0; x < x0 + grid_size; x += bb_size {
-			min_y := math.INF_F32
-			max_y := -math.INF_F32
-			for i := z; i < z + bb_size + 1; i += 1 {
-				for j := x; j < x + bb_size + 1; j += 1 {
-					y := height_map[i][j]
-					if y > max_y {
-						max_y = y
-					}
-					if y < min_y {
-						min_y = y
-					}
-				}
-			}
-			bb: BoundingBox = {
-				min = {f32(x), min_y, f32(z)},
-				max = {f32(x + bb_size), max(max_y, min_y + 0.001), f32(z + bb_size)},
-			}
+			bb := get_bb_from_cache(x, z, bb_size)
 			bb_d := hit_distance(bb, ray_origin, ray_dir)
 			if bb_d > 0 {
-				triangle_d := get_triangle_d(x, z, grid_size / 2, ray_origin, ray_dir)
+				triangle_d := get_triangle_d_recursive(x, z, grid_size / 2, ray_origin, ray_dir)
 				if (triangle_d > 0 && (min_d == 0 || triangle_d < min_d)) {
 					min_d = triangle_d
 				}
@@ -102,7 +78,7 @@ get_triangle_d :: proc(
 	return min_d
 }
 
-get_foo :: proc(ray_origin: [3]f32, ray_dir: [3]f32, ground_vertices: []Vertex) -> f32 {
+get_triangle_d :: proc(ray_origin: [3]f32, ray_dir: [3]f32, ground_vertices: []Vertex) -> f32 {
 	triangle_d: f32 = 0
 	triangle_i := 0
 	triangle: [3][3]f32
@@ -178,4 +154,57 @@ ray_triangle_intersect :: proc(
 	t^ = hit_t
 
 	return true
+}
+
+// 2² + 4² + 8² + 16² + 32² + 64² + 128² + 256² + 512² + 1024² = 1398100
+// 2² + 4² + 8² + 16² + 32² + 64² + 128² + 256² + 512² = 349524
+// 2² + 4² + 8² + 16² + 32² + 64² + 128² + 256² = 87380
+// 2² + 4² + 8² + 16² + 32² + 64² + 128² = 21844
+// 2² + 4² + 8² + 16² + 32² + 64² = 5460
+// 2² + 4² + 8² + 16² + 32² = 1364
+// 2² + 4² + 8² + 16² = 340
+// 2² + 4² + 8² = 84
+ground_bb_cache: [1398100]BoundingBox // Big enough cache for a 1024 grid
+empty_bb: BoundingBox
+
+get_bb_from_cache :: proc(x: int, z: int, bb_size: int) -> BoundingBox {
+	grid_size := bb_size * 2
+	offset := 0
+	for q := 2; q <= GRID_SIZE / grid_size; q *= 2 {
+		offset += q * q
+	}
+
+	bb_grid_size := GRID_SIZE / bb_size
+
+	bb_cache_i := offset + z / bb_size * bb_grid_size + x / bb_size
+
+	cached_bb := ground_bb_cache[bb_cache_i]
+
+	if cached_bb != empty_bb {
+		return cached_bb
+	}
+
+	min_y := math.INF_F32
+	max_y := -math.INF_F32
+	for i := z; i < z + bb_size + 1; i += 1 {
+		for j := x; j < x + bb_size + 1; j += 1 {
+			y := height_map[i][j]
+			if y > max_y {
+				max_y = y
+			}
+			if y < min_y {
+				min_y = y
+			}
+		}
+	}
+
+	bb: BoundingBox = {
+		min = {f32(x), min_y, f32(z)},
+		// 0.001 seems to be a big enough height to get recognized by raycasting
+		max = {f32(x + bb_size), max(max_y, min_y + 0.001), f32(z + bb_size)},
+	}
+
+	ground_bb_cache[bb_cache_i] = bb
+
+	return bb
 }

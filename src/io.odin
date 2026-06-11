@@ -198,19 +198,19 @@ hover :: proc(x, y: f64) {
 		view := l.matrix4_look_at_f32(camera.pos, camera.pos + camera.front, camera.up)
 		ray_world := l.normalize((l.inverse(view) * ray_eye).xyz)
 
-		// triangle_d := get_ground_triangle_hit_distance(camera.pos, ray_world)
+		triangle_d := get_ground_triangle_hit_distance(camera.pos, ray_world)
 
-		// if (triangle_d > 0) {
-		// 	// Update height_map_pos
-		// 	entry_point := camera.pos + ray_world * triangle_d
+		if (triangle_d > 0) {
+			// Update height_map_pos
+			entry_point := camera.pos + ray_world * triangle_d
 
-		// 	height_map_row := int(entry_point.z + 0.5)
-		// 	height_map_col := int(entry_point.x + 0.5)
+			height_map_row := int(entry_point.z + 0.5)
+			height_map_col := int(entry_point.x + 0.5)
 
-		// 	height_map_pos.x = f32(height_map_col)
-		// 	height_map_pos.y = height_map[height_map_row][height_map_col]
-		// 	height_map_pos.z = f32(height_map_row)
-		// }
+			height_map_pos.x = f32(height_map_col)
+			height_map_pos.y = height_map[height_map_row][height_map_col]
+			height_map_pos.z = f32(height_map_row)
+		}
 	}
 }
 
