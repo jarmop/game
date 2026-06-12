@@ -228,10 +228,8 @@ drag_on_left_press :: proc(x, y: f64) {
 		height_map_pos.y += f32(height_d / abs(height_d) * step)
 		height_map[int(height_map_pos.z)][int(height_map_pos.x)] = height_map_pos.y
 
-		update_grid(height_map_pos)
-
-		// This grid recreation is the issue
 		// create_grid(ground_vertices[:])
+		update_grid(height_map_pos)
 
 		gl.BindVertexArray(ground_vao)
 		gl.BindBuffer(gl.ARRAY_BUFFER, ground_vbo)

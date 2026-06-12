@@ -10,7 +10,6 @@ update_grid :: proc(p: [3]f32) {
 	// fmt.println(height_map_point)
 
 
-	VERTICES_PER_ROW := GRID_SIZE * VERTICES_PER_CELL
 	cell_i := int(p.z) * VERTICES_PER_ROW + int(p.x) * VERTICES_PER_CELL
 
 	// fmt.println(cell_i)
@@ -20,83 +19,77 @@ update_grid :: proc(p: [3]f32) {
 		if p.x == 0 {
 			// TOP LEFT
 
-			x := int(p.x)
-			z := int(p.z)
-
-			top_left := p.y
-			top_right := height_map[z][x + 1]
-			bottom_right := height_map[z + 1][x + 1]
-			bottom_left := height_map[z + 1][x]
-			center := get_center_y(top_left, top_right, bottom_right, bottom_left)
-			update_cell_y(cell_i, top_left, top_right, bottom_right, bottom_left, center)
+			update_cell_y(cell_i)
 		} else if p.x == HEIGHT_MAP_SIZE - 1 {
 			// TOP RIGHT
-			fmt.println("TOP RIGHT")
+			// fmt.println("TOP RIGHT")
 
 			cell_i -= VERTICES_PER_CELL
 
-			x := int(p.x)
-			z := int(p.z)
-
-			top_left := height_map[z][x - 1]
-			top_right := height_map[z][x] // p.y
-			bottom_right := height_map[z + 1][x]
-			bottom_left := height_map[z + 1][x - 1]
-			center := get_center_y(top_left, top_right, bottom_right, bottom_left)
-			update_cell_y(cell_i, top_left, top_right, bottom_right, bottom_left, center)
+			update_cell_y(cell_i)
 		} else {
 			// TOP EDGE			
-			fmt.println("TOP EDGE")
+			// fmt.println("TOP EDGE")
 
+			// Left cell
+			update_cell_y(cell_i - VERTICES_PER_CELL)
+			// Right cell
+			update_cell_y(cell_i)
 		}
 	} else if p.z == HEIGHT_MAP_SIZE - 1 {
 		cell_i -= VERTICES_PER_ROW
 
 		if p.x == 0 {
 			// BOTTOM LEFT CELL
-			fmt.println("BOTTOM LEFT")
+			// fmt.println("BOTTOM LEFT")
 
-			// Top left corner of the cell
-			// p0 :[3]f32= {p.x,y,p.z-1}
-			x := int(p.x)
-			z := int(p.z - 1)
-
-			// top_left := height_map[z - 1][x]
-			// top_right := height_map[z][x + 1]
-			// bottom_right := height_map[z + 1][x + 1]
-			// bottom_left := height_map[z + 1][x]
-			// center := get_center_y(top_left, top_right, bottom_right, bottom_left)
-			// update_cell_y(cell_i, top_left, top_right, bottom_right, bottom_left, center)
-
-			top_left := height_map[z][x]
-			top_right := height_map[z][x + 1]
-			bottom_right := height_map[z + 1][x + 1]
-			bottom_left := height_map[z + 1][x]
-			center := get_center_y(top_left, top_right, bottom_right, bottom_left)
-			update_cell_y(cell_i, top_left, top_right, bottom_right, bottom_left, center)
+			update_cell_y(cell_i)
 		} else if p.x == HEIGHT_MAP_SIZE - 1 {
 			// BOTTOM RIGHT
-			fmt.println("BOTTOM RIGHT")
+			// fmt.println("BOTTOM RIGHT")
 
 			cell_i -= VERTICES_PER_CELL
+
+			update_cell_y(cell_i)
 		} else {
 			// BOTTOM EDGE
-			fmt.println("BOTTOM EDGE")
+			// fmt.println("BOTTOM EDGE")
+
+			// Left cell
+			update_cell_y(cell_i - VERTICES_PER_CELL)
+			// Right cell
+			update_cell_y(cell_i)
 		}
 	} else if p.x == 0 {
 		// LEFT EDGE
-		fmt.println("LEFT EDGE")
+		// fmt.println("LEFT EDGE")
 
+		// Top cell
+		update_cell_y(cell_i - VERTICES_PER_ROW)
+		// Bottom cell
+		update_cell_y(cell_i)
 	} else if p.x == HEIGHT_MAP_SIZE - 1 {
 		// RIGHT EDGE
-		fmt.println("RIGHT EDGE")
+		// fmt.println("RIGHT EDGE")
 
 		cell_i -= VERTICES_PER_CELL
 
+		// Top cell
+		update_cell_y(cell_i - VERTICES_PER_ROW)
+		// Bottom cell
+		update_cell_y(cell_i)
 	} else {
 		// INTERIOR
-		fmt.println("INTERIOR")
+		// fmt.println("INTERIOR")
 
+		// Top left cell
+		update_cell_y(cell_i - VERTICES_PER_ROW - VERTICES_PER_CELL)
+		// Top right cell
+		update_cell_y(cell_i - VERTICES_PER_ROW)
+		// Bottom right cell
+		update_cell_y(cell_i)
+		// Bottom left cell
+		update_cell_y(cell_i - VERTICES_PER_CELL)
 	}
 
 
@@ -125,7 +118,20 @@ update_grid :: proc(p: [3]f32) {
 // }
 
 // update_cell_top_left :: proc(grid_i: int, top_left: [3]f32) {}
-update_cell_y :: proc(grid_i: int, top_left, top_right, bottom_right, bottom_left, center: f32) {
+// update_cell_y :: proc(grid_i: int, top_left, top_right, bottom_right, bottom_left, center: f32) {
+update_cell_y :: proc(grid_i: int) {
+	x := grid_i % VERTICES_PER_ROW / VERTICES_PER_CELL
+	z := grid_i / VERTICES_PER_ROW
+
+	// fmt.println(x, z)
+
+	top_left := height_map[z][x]
+	top_right := height_map[z][x + 1]
+	bottom_right := height_map[z + 1][x + 1]
+	bottom_left := height_map[z + 1][x]
+	center := get_center_y(top_left, top_right, bottom_right, bottom_left)
+	// update_cell_y(grid_i, top_left, top_right, bottom_right, bottom_left, center)
+
 	ground_vertices[grid_i + 0].pos.y = top_left
 	ground_vertices[grid_i + 1].pos.y = top_right
 	ground_vertices[grid_i + 2].pos.y = center
@@ -144,6 +150,19 @@ update_cell_y :: proc(grid_i: int, top_left, top_right, bottom_right, bottom_lef
 	ground_vertices[grid_i + 9].pos.y = bottom_left
 	ground_vertices[grid_i + 10].pos.y = top_left
 	ground_vertices[grid_i + 11].pos.y = center
+
+	// Calculate normals
+	for i := 0; i < 12; i += 3 {
+		ti := grid_i + i
+		v0 := ground_vertices[ti + 0].pos
+		v1 := ground_vertices[ti + 1].pos
+		v2 := ground_vertices[ti + 2].pos
+		normal := -m.normalize(m.cross(v1 - v0, v2 - v0))
+		ground_vertices[ti + 0].normal = normal
+		ground_vertices[ti + 1].normal = normal
+		ground_vertices[ti + 2].normal = normal
+		// fmt.println(normal)
+	}
 }
 
 create_grid :: proc(vertices: []Vertex) {
