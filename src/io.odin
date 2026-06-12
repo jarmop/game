@@ -227,7 +227,12 @@ drag_on_left_press :: proc(x, y: f64) {
 	if (abs(height_d) > step) {
 		height_map_pos.y += f32(height_d / abs(height_d) * step)
 		height_map[int(height_map_pos.z)][int(height_map_pos.x)] = height_map_pos.y
-		create_grid(ground_vertices[:])
+
+		update_grid(height_map_pos)
+
+		// This grid recreation is the issue
+		// create_grid(ground_vertices[:])
+
 		gl.BindVertexArray(ground_vao)
 		gl.BindBuffer(gl.ARRAY_BUFFER, ground_vbo)
 		gl.BufferData(
@@ -238,6 +243,8 @@ drag_on_left_press :: proc(x, y: f64) {
 		)
 
 		update_pathfinding_data()
+
+		// Reset the relevant bounding boxes in the cache
 
 		height_d = 0
 	}

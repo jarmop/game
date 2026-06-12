@@ -3,6 +3,149 @@ package game
 import "core:fmt"
 import m "core:math/linalg"
 
+/*
+Need to update affected center points as well.
+*/
+update_grid :: proc(p: [3]f32) {
+	// fmt.println(height_map_point)
+
+
+	VERTICES_PER_ROW := GRID_SIZE * VERTICES_PER_CELL
+	cell_i := int(p.z) * VERTICES_PER_ROW + int(p.x) * VERTICES_PER_CELL
+
+	// fmt.println(cell_i)
+	// fmt.println(p.x, p.z)
+
+	if p.z == 0 {
+		if p.x == 0 {
+			// TOP LEFT
+
+			x := int(p.x)
+			z := int(p.z)
+
+			top_left := p.y
+			top_right := height_map[z][x + 1]
+			bottom_right := height_map[z + 1][x + 1]
+			bottom_left := height_map[z + 1][x]
+			center := get_center_y(top_left, top_right, bottom_right, bottom_left)
+			update_cell_y(cell_i, top_left, top_right, bottom_right, bottom_left, center)
+		} else if p.x == HEIGHT_MAP_SIZE - 1 {
+			// TOP RIGHT
+			fmt.println("TOP RIGHT")
+
+			cell_i -= VERTICES_PER_CELL
+
+			x := int(p.x)
+			z := int(p.z)
+
+			top_left := height_map[z][x - 1]
+			top_right := height_map[z][x] // p.y
+			bottom_right := height_map[z + 1][x]
+			bottom_left := height_map[z + 1][x - 1]
+			center := get_center_y(top_left, top_right, bottom_right, bottom_left)
+			update_cell_y(cell_i, top_left, top_right, bottom_right, bottom_left, center)
+		} else {
+			// TOP EDGE			
+			fmt.println("TOP EDGE")
+
+		}
+	} else if p.z == HEIGHT_MAP_SIZE - 1 {
+		cell_i -= VERTICES_PER_ROW
+
+		if p.x == 0 {
+			// BOTTOM LEFT CELL
+			fmt.println("BOTTOM LEFT")
+
+			// Top left corner of the cell
+			// p0 :[3]f32= {p.x,y,p.z-1}
+			x := int(p.x)
+			z := int(p.z - 1)
+
+			// top_left := height_map[z - 1][x]
+			// top_right := height_map[z][x + 1]
+			// bottom_right := height_map[z + 1][x + 1]
+			// bottom_left := height_map[z + 1][x]
+			// center := get_center_y(top_left, top_right, bottom_right, bottom_left)
+			// update_cell_y(cell_i, top_left, top_right, bottom_right, bottom_left, center)
+
+			top_left := height_map[z][x]
+			top_right := height_map[z][x + 1]
+			bottom_right := height_map[z + 1][x + 1]
+			bottom_left := height_map[z + 1][x]
+			center := get_center_y(top_left, top_right, bottom_right, bottom_left)
+			update_cell_y(cell_i, top_left, top_right, bottom_right, bottom_left, center)
+		} else if p.x == HEIGHT_MAP_SIZE - 1 {
+			// BOTTOM RIGHT
+			fmt.println("BOTTOM RIGHT")
+
+			cell_i -= VERTICES_PER_CELL
+		} else {
+			// BOTTOM EDGE
+			fmt.println("BOTTOM EDGE")
+		}
+	} else if p.x == 0 {
+		// LEFT EDGE
+		fmt.println("LEFT EDGE")
+
+	} else if p.x == HEIGHT_MAP_SIZE - 1 {
+		// RIGHT EDGE
+		fmt.println("RIGHT EDGE")
+
+		cell_i -= VERTICES_PER_CELL
+
+	} else {
+		// INTERIOR
+		fmt.println("INTERIOR")
+
+	}
+
+
+	/*
+	Each height point is shared by 2 - 8 triangles. On top of that, they affect the center point 
+	which is shared by 4 triangles. Triangles are not sharing vertices.
+	
+	Simpler way to think about this is this
+	map corner point:	2 vertices | 1 center  = 4 vertices		| The center y value is based on the adjacent height points
+	map edge point:		4 vertices | 2 centers = 8 vertices
+	map interior poin:	8 vertices | 4 centers = 16 vertices
+
+
+	Calculate the affected center point heights before updating the vertices.
+
+	Always update the same size chunk of the vertices, regardless of how many of them are changed.
+
+	Share code from the grid creation. Should be easy.
+
+	*/
+}
+
+// Cell :: struct {
+// 	top_left: [3]f32,
+
+// }
+
+// update_cell_top_left :: proc(grid_i: int, top_left: [3]f32) {}
+update_cell_y :: proc(grid_i: int, top_left, top_right, bottom_right, bottom_left, center: f32) {
+	ground_vertices[grid_i + 0].pos.y = top_left
+	ground_vertices[grid_i + 1].pos.y = top_right
+	ground_vertices[grid_i + 2].pos.y = center
+
+	// RIGHT
+	ground_vertices[grid_i + 3].pos.y = top_right
+	ground_vertices[grid_i + 4].pos.y = bottom_right
+	ground_vertices[grid_i + 5].pos.y = center
+
+	// BOTTOM
+	ground_vertices[grid_i + 6].pos.y = bottom_right
+	ground_vertices[grid_i + 7].pos.y = bottom_left
+	ground_vertices[grid_i + 8].pos.y = center
+
+	// LEFT
+	ground_vertices[grid_i + 9].pos.y = bottom_left
+	ground_vertices[grid_i + 10].pos.y = top_left
+	ground_vertices[grid_i + 11].pos.y = center
+}
+
 create_grid :: proc(vertices: []Vertex) {
 	uv_low: f32 = 0.0
 	uv_high: f32 = 1.0
@@ -115,6 +258,7 @@ create_grid :: proc(vertices: []Vertex) {
 }
 
 get_center_y :: proc(top_left, top_right, bottom_left, bottom_right: f32) -> f32 {
+	// VERSION 1
 	// y: f32 = 1
 	// foo: f32 = 2 * y
 	// if top_left.pos.y + bottom_right.pos.y == foo ||
@@ -127,28 +271,26 @@ get_center_y :: proc(top_left, top_right, bottom_left, bottom_right: f32) -> f32
 	// 	center.pos.y = y / 2
 	// }
 
-	diagonal1_equal := abs(top_left - bottom_right) < 0.01
-	diagonal2_equal := abs(bottom_left - top_right) < 0.01
-
-	if diagonal1_equal && diagonal2_equal {
-		return max(top_left, top_right)
-	}
-	if diagonal1_equal {
-		return top_left
-	}
-	if diagonal2_equal {
-		return top_right
-	}
-
-	return min(top_left + bottom_right, bottom_left + top_right) / 2
+	// VERSION 2
+	// diagonal1_equal := abs(top_left - bottom_right) < 0.01
+	// diagonal2_equal := abs(bottom_left - top_right) < 0.01
+	// if diagonal1_equal && diagonal2_equal {
+	// 	return max(top_left, top_right)
+	// }
+	// if diagonal1_equal {
+	// 	return top_left
+	// }
+	// if diagonal2_equal {
+	// 	return top_right
+	// }
+	// return min(top_left + bottom_right, bottom_left + top_right) / 2
 	// return min(top_left, bottom_right, bottom_left, top_right)
 
-	// total_h := top_left + top_right + bottom_left + bottom_right
-	// // // max_h := max(top_left.pos.y, top_right.pos.y, bottom_left.pos.y, bottom_right.pos.y)
-	// // // if (max_h != total_h) {
-	// // // 	// More than one above 0
-	// return total_h / 4
+	// VERSION 3
+	total_h := top_left + top_right + bottom_left + bottom_right
+	return total_h / 4
 
+	// VERSION 4
 	// }
 	// maxv := max(top_left.pos.y, top_right.pos.y, bottom_left.pos.y, bottom_right.pos.y)
 	// maxc := 0
@@ -171,6 +313,7 @@ get_center_y :: proc(top_left, top_right, bottom_left, bottom_right: f32) -> f32
 	// 	center.pos.y = maxv - 0.5
 	// }
 
+	// VERSION 5
 	// Y is the average of the highest two opposing corners
 	// return max(top_left + bottom_right, bottom_left + top_right) / 2
 }

@@ -45,8 +45,9 @@ package game
 // 2² + 4² + 8² = 84
 // 2² + 4² = 20
 GRID_SIZE :: 4
-height_map: [GRID_SIZE + 1][GRID_SIZE + 1]f32
-empty_map: [GRID_SIZE + 1][GRID_SIZE + 1]f32
+HEIGHT_MAP_SIZE :: GRID_SIZE + 1
+height_map: [HEIGHT_MAP_SIZE][HEIGHT_MAP_SIZE]f32
+empty_map: [HEIGHT_MAP_SIZE][HEIGHT_MAP_SIZE]f32
 height_map_vao: u32
 height_map_pos: [3]f32 = {0, height_map[0][0], 0}
 
