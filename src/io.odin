@@ -240,7 +240,7 @@ drag_on_left_press :: proc(x, y: f64) {
 			gl.STATIC_DRAW,
 		)
 
-		update_pathfinding_data()
+		update_pathfinding_data(height_map_pos)
 
 		// Reset the relevant bounding boxes in the cache
 

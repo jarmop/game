@@ -130,7 +130,7 @@ init_scene :: proc() {
 		size_of(ground_vertices),
 	)
 
-	update_pathfinding_data()
+	create_pathfinding_data()
 
 	// create_ground_bounding_boxes()
 

@@ -26,69 +26,154 @@ triangle_table: [CELL_COUNT * TRIANGLES_PER_CELL]Triangle
 
 cell_table: [CELL_COUNT]Cell
 
-update_pathfinding_data :: proc() {
-	// fmt.println("----------")
-
-	TRIANGLES_PER_ROW :: GRID_SIZE * TRIANGLES_PER_CELL
-
+create_pathfinding_data :: proc() {
 	for cell_i := 0; cell_i < CELL_COUNT; cell_i += 1 {
-		// TRIANGLE 0
-		triangle_i := cell_i * TRIANGLES_PER_CELL
-		is_first_row := cell_i < GRID_SIZE
-		triangle_table[triangle_i] = {
-			bottom = nil if is_first_row else &triangle_table[triangle_i + 2 - TRIANGLES_PER_ROW],
-			left   = &triangle_table[triangle_i + 1],
-			right  = &triangle_table[triangle_i + TRIANGLES_PER_CELL - 1],
-		}
-		ground_vertex_i := cell_i * VERTICES_PER_CELL
-		for i in 0 ..< 3 {
-			triangle_table[triangle_i].corners[i] = ground_vertices[ground_vertex_i + i].pos
-		}
-		cell_table[cell_i].triangles[0] = &triangle_table[triangle_i]
-
-		// TRIANGLE 1
-		triangle_i += 1
-		is_last_col := (cell_i + 1) % GRID_SIZE == 0
-		triangle_table[triangle_i] = {
-			bottom = nil if is_last_col else &triangle_table[triangle_i + 2 + TRIANGLES_PER_CELL],
-			left   = &triangle_table[triangle_i + 1],
-			right  = &triangle_table[triangle_i - 1],
-		}
-		ground_vertex_i += 3
-		for i in 0 ..< 3 {
-			triangle_table[triangle_i].corners[i] = ground_vertices[ground_vertex_i + i].pos
-		}
-		cell_table[cell_i].triangles[1] = &triangle_table[triangle_i]
-
-		// TRIANGLE 2
-		triangle_i += 1
-		is_last_row := cell_i >= GRID_SIZE * (GRID_SIZE - 1)
-		triangle_table[triangle_i] = {
-			bottom = nil if is_last_row else &triangle_table[triangle_i - 2 + TRIANGLES_PER_ROW],
-			left   = &triangle_table[triangle_i + 1],
-			right  = &triangle_table[triangle_i - 1],
-		}
-		ground_vertex_i += 3
-		for i in 0 ..< 3 {
-			triangle_table[triangle_i].corners[i] = ground_vertices[ground_vertex_i + i].pos
-		}
-		cell_table[cell_i].triangles[2] = &triangle_table[triangle_i]
-
-		// TRIANGLE 3
-		triangle_i += 1
-		is_first_col := cell_i % GRID_SIZE == 0
-		triangle_table[triangle_i] = {
-			bottom = nil if is_first_col else &triangle_table[triangle_i - 2 - TRIANGLES_PER_CELL],
-			// left   = &triangle_table[cell_i * TRIANGLES_PER_CELL],
-			left   = &triangle_table[triangle_i - 3],
-			right  = &triangle_table[triangle_i - 1],
-		}
-		ground_vertex_i += 3
-		for i in 0 ..< 3 {
-			triangle_table[triangle_i].corners[i] = ground_vertices[ground_vertex_i + i].pos
-		}
-		cell_table[cell_i].triangles[3] = &triangle_table[triangle_i]
+		update_pathfinding_data_cell(cell_i)
 	}
+}
+
+update_pathfinding_data :: proc(p: [3]f32) {
+	// fmt.println("----------")
+	cell_i := int(p.z) * GRID_SIZE + int(p.x)
+
+	// fmt.println(cell_i)
+	// fmt.println(p.x, p.z)
+
+	if p.z == 0 {
+		if p.x == 0 {
+			// TOP LEFT
+
+			update_pathfinding_data_cell(cell_i)
+		} else if p.x == HEIGHT_MAP_SIZE - 1 {
+			// TOP RIGHT
+			// fmt.println("TOP RIGHT")
+
+			cell_i -= 1
+
+			update_pathfinding_data_cell(cell_i)
+		} else {
+			// TOP EDGE			
+			// fmt.println("TOP EDGE")
+
+			// Left cell
+			update_pathfinding_data_cell(cell_i - 1)
+			// Right cell
+			update_pathfinding_data_cell(cell_i)
+		}
+	} else if p.z == HEIGHT_MAP_SIZE - 1 {
+		cell_i -= GRID_SIZE
+
+		if p.x == 0 {
+			// BOTTOM LEFT CELL
+			// fmt.println("BOTTOM LEFT")
+
+			update_pathfinding_data_cell(cell_i)
+		} else if p.x == HEIGHT_MAP_SIZE - 1 {
+			// BOTTOM RIGHT
+			// fmt.println("BOTTOM RIGHT")
+
+			cell_i -= 1
+
+			update_pathfinding_data_cell(cell_i)
+		} else {
+			// BOTTOM EDGE
+			// fmt.println("BOTTOM EDGE")
+
+			// Left cell
+			update_pathfinding_data_cell(cell_i - 1)
+			// Right cell
+			update_pathfinding_data_cell(cell_i)
+		}
+	} else if p.x == 0 {
+		// LEFT EDGE
+		// fmt.println("LEFT EDGE")
+
+		// Top cell
+		update_pathfinding_data_cell(cell_i - GRID_SIZE)
+		// Bottom cell
+		update_pathfinding_data_cell(cell_i)
+	} else if p.x == HEIGHT_MAP_SIZE - 1 {
+		// RIGHT EDGE
+		// fmt.println("RIGHT EDGE")
+
+		cell_i -= 1
+
+		// Top cell
+		update_pathfinding_data_cell(cell_i - GRID_SIZE)
+		// Bottom cell
+		update_pathfinding_data_cell(cell_i)
+	} else {
+		// INTERIOR
+		// fmt.println("INTERIOR")
+
+		// Top left cell
+		update_pathfinding_data_cell(cell_i - GRID_SIZE - 1)
+		// Top right cell
+		update_pathfinding_data_cell(cell_i - GRID_SIZE)
+		// Bottom right cell
+		update_pathfinding_data_cell(cell_i)
+		// Bottom left cell
+		update_pathfinding_data_cell(cell_i - 1)
+	}
+}
+
+update_pathfinding_data_cell :: proc(cell_i: int) {
+	// TRIANGLE 0
+	triangle_i := cell_i * TRIANGLES_PER_CELL
+	is_first_row := cell_i < GRID_SIZE
+	triangle_table[triangle_i] = {
+		bottom = nil if is_first_row else &triangle_table[triangle_i + 2 - TRIANGLES_PER_ROW],
+		left   = &triangle_table[triangle_i + 1],
+		right  = &triangle_table[triangle_i + TRIANGLES_PER_CELL - 1],
+	}
+	ground_vertex_i := cell_i * VERTICES_PER_CELL
+	for i in 0 ..< 3 {
+		triangle_table[triangle_i].corners[i] = ground_vertices[ground_vertex_i + i].pos
+	}
+	cell_table[cell_i].triangles[0] = &triangle_table[triangle_i]
+
+	// TRIANGLE 1
+	triangle_i += 1
+	is_last_col := (cell_i + 1) % GRID_SIZE == 0
+	triangle_table[triangle_i] = {
+		bottom = nil if is_last_col else &triangle_table[triangle_i + 2 + TRIANGLES_PER_CELL],
+		left   = &triangle_table[triangle_i + 1],
+		right  = &triangle_table[triangle_i - 1],
+	}
+	ground_vertex_i += 3
+	for i in 0 ..< 3 {
+		triangle_table[triangle_i].corners[i] = ground_vertices[ground_vertex_i + i].pos
+	}
+	cell_table[cell_i].triangles[1] = &triangle_table[triangle_i]
+
+	// TRIANGLE 2
+	triangle_i += 1
+	is_last_row := cell_i >= GRID_SIZE * (GRID_SIZE - 1)
+	triangle_table[triangle_i] = {
+		bottom = nil if is_last_row else &triangle_table[triangle_i - 2 + TRIANGLES_PER_ROW],
+		left   = &triangle_table[triangle_i + 1],
+		right  = &triangle_table[triangle_i - 1],
+	}
+	ground_vertex_i += 3
+	for i in 0 ..< 3 {
+		triangle_table[triangle_i].corners[i] = ground_vertices[ground_vertex_i + i].pos
+	}
+	cell_table[cell_i].triangles[2] = &triangle_table[triangle_i]
+
+	// TRIANGLE 3
+	triangle_i += 1
+	is_first_col := cell_i % GRID_SIZE == 0
+	triangle_table[triangle_i] = {
+		bottom = nil if is_first_col else &triangle_table[triangle_i - 2 - TRIANGLES_PER_CELL],
+		// left   = &triangle_table[cell_i * TRIANGLES_PER_CELL],
+		left   = &triangle_table[triangle_i - 3],
+		right  = &triangle_table[triangle_i - 1],
+	}
+	ground_vertex_i += 3
+	for i in 0 ..< 3 {
+		triangle_table[triangle_i].corners[i] = ground_vertices[ground_vertex_i + i].pos
+	}
+	cell_table[cell_i].triangles[3] = &triangle_table[triangle_i]
 }
 
 get_triangle :: proc(p: [3]f32) -> ^Triangle {
@@ -295,7 +380,7 @@ intersect_xz :: proc(p1, p2, p3, p4: [2]f32) -> [2]f32 {
 
 	if (determinant == 0) {
 		// Parallel or coincident
-		fmt.println("wtf")
+		fmt.println("Error: lines don't intersect")
 		return {0, 0}
 	} else {
 		x := (B2 * C1 - B1 * C2) / determinant
