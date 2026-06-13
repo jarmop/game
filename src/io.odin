@@ -242,7 +242,7 @@ drag_on_left_press :: proc(x, y: f64) {
 
 		update_pathfinding_data(height_map_pos)
 
-		// Reset the relevant bounding boxes in the cache
+		update_ground_bb_cache(int(height_map_pos.x), int(height_map_pos.z))
 
 		height_d = 0
 	}

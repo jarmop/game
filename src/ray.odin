@@ -167,23 +167,62 @@ ray_triangle_intersect :: proc(
 ground_bb_cache: [1398100]BoundingBox // Big enough cache for a 1024 grid
 empty_bb: BoundingBox
 
-get_bb_from_cache :: proc(x: int, z: int, bb_size: int) -> BoundingBox {
+/*
+	levels
+	0: 0
+	1: 4 
+	2: 4 + 16
+	3: 4 + 16 + 64
+	4: 4 + 16 + 64 + 256
+
+	offset per grid size
+	256: 0
+	128: 4 
+	64: 4 + 16
+	32: 4 + 16 + 64
+	16: 4 + 16 + 64 + 256
+	8: 4 + 16 + 64 + 256 + 1024
+	4: 4 + 16 + 64 + 256 + 1024 + 4096
+	2: 4 + 16 + 64 + 256 + 1024 + 4096 + 16384
+	
+	The total cache length for 256 GRID_SIZE is: 4 + 16 + 64 + 256 + 1024 + 4096 + 16384 + 65536
+
+	Would it be easier to understand if I flip the logic?
+
+	offset per bb amount
+	4: 0
+	16: 4 
+	64: 4 + 16
+	256: 4 + 16 + 64
+	1k: 4 + 16 + 64 + 256
+	4k: 4 + 16 + 64 + 256 + 1k
+	16k: 4 + 16 + 64 + 256 + 1k + 4k
+	64k: 4 + 16 + 64 + 256 + 1k + 4k + 16k
+	
+	
+*/
+get_bb_cache_offset :: proc(bb_size: int) -> int {
 	grid_size := bb_size * 2
 	offset := 0
+
 	for q := 2; q <= GRID_SIZE / grid_size; q *= 2 {
 		offset += q * q
 	}
+
+	return offset
+}
+
+get_bb_cache_i :: proc(x: int, z: int, bb_size: int) -> int {
+	offset := get_bb_cache_offset(bb_size)
 
 	bb_grid_size := GRID_SIZE / bb_size
 
 	bb_cache_i := offset + z / bb_size * bb_grid_size + x / bb_size
 
-	cached_bb := ground_bb_cache[bb_cache_i]
+	return bb_cache_i
+}
 
-	if cached_bb != empty_bb {
-		return cached_bb
-	}
-
+create_ground_bb :: proc(x: int, z: int, bb_size: int) -> BoundingBox {
 	min_y := math.INF_F32
 	max_y := -math.INF_F32
 	for i := z; i < z + bb_size + 1; i += 1 {
@@ -204,9 +243,182 @@ get_bb_from_cache :: proc(x: int, z: int, bb_size: int) -> BoundingBox {
 		max = {f32(x + bb_size), max(max_y, min_y + 0.001), f32(z + bb_size)},
 	}
 
+	return bb
+}
+
+get_bb_from_cache :: proc(x: int, z: int, bb_size: int) -> BoundingBox {
+	bb_cache_i := get_bb_cache_i(x, z, bb_size)
+
+	cached_bb := ground_bb_cache[bb_cache_i]
+
+	if cached_bb != empty_bb {
+		return cached_bb
+	}
+
+	bb := create_ground_bb(x, z, bb_size)
+
 	ground_bb_cache[bb_cache_i] = bb
 
 	return bb
+}
+
+update_bb_in_cache_recursive :: proc(x0: int, z0: int, grid_size: int) {
+
+}
+
+// reset_ground_bb_cache :: proc
+
+// Update each bb that contains the point defined by x and z
+update_ground_bb_cache :: proc(x: int, z: int) {
+	// fmt.println(height_map_point)
+
+	// offset := 0
+	// for grid_size := GRID_SIZE; grid_size > 1; grid_size /= 2 {
+	// 	bb_size := grid_size / 2
+	// 	// for q := 2; q <= GRID_SIZE / grid_size; q *= 2 {
+	// 	// 	offset += q * q
+	// 	// }
+
+	// 	bb_grid_size := GRID_SIZE / bb_size
+
+	// 	bb_cache_i := offset + z / bb_size * bb_grid_size + x / bb_size
+	// }
+
+
+	// fmt.println(bb_cache_i)
+	// fmt.println(ground_bb_cache[bb_cache_i])
+
+	// cell_i := int(z) * VERTICES_PER_ROW + int(x) * VERTICES_PER_CELL
+
+	// fmt.println(cell_i)
+	// fmt.println(p.x, z)
+
+	if z == 0 {
+		if x == 0 {
+			// TOP LEFT
+
+			height := height_map[z][x]
+
+			// bb_size = 1
+			// cached_bb := &ground_bb_cache[get_bb_cache_i(x, z, 1)]
+			// bb_updated := false
+			// if cached_bb.max.y < height {
+			// 	cached_bb.max.y = height
+			// 	bb_updated = true
+			// } else if cached_bb.min.y > height {
+			// 	cached_bb.min.y = height
+			// 	bb_updated = true
+			// }
+			// if !bb_updated {
+			// 	fmt.println("not updated 1")
+			// 	return
+			// }
+
+			// // bb_size 2
+			// cached_bb = &ground_bb_cache[get_bb_cache_i(x, z, 2)]
+			// if cached_bb.max.y < height {
+			// 	cached_bb.max.y = height
+			// 	bb_updated = true
+			// } else if cached_bb.min.y > height {
+			// 	cached_bb.min.y = height
+			// 	bb_updated = true
+			// }
+			// if !bb_updated {
+			// 	fmt.println("not updated 2")
+			// 	return
+			// }
+
+			for grid_size := 2; grid_size <= GRID_SIZE; grid_size *= 2 {
+				bb_size := grid_size / 2
+				cached_bb := &ground_bb_cache[get_bb_cache_i(x, z, bb_size)]
+				bb_updated := false
+				if cached_bb.max.y < height {
+					cached_bb.max.y = height
+					bb_updated = true
+				} else if cached_bb.min.y > height {
+					cached_bb.min.y = height
+					bb_updated = true
+				}
+				if !bb_updated {
+					fmt.println("not updated", grid_size)
+					break
+				}
+			}
+
+			// update_cell_y(cell_i)
+			// ground_bb_cache[bb_cache_i]
+			// update_bb_in_cache(bb_cache_i)
+		} else if x == HEIGHT_MAP_SIZE - 1 {
+			// TOP RIGHT
+			// fmt.println("TOP RIGHT")
+
+			// cell_i -= VERTICES_PER_CELL
+
+			// update_cell_y(cell_i)
+		} else {
+			// TOP EDGE			
+			// fmt.println("TOP EDGE")
+
+			// Left cell
+			// update_cell_y(cell_i - VERTICES_PER_CELL)
+			// Right cell
+			// update_cell_y(cell_i)
+		}
+	} else if z == HEIGHT_MAP_SIZE - 1 {
+		// cell_i -= VERTICES_PER_ROW
+
+		if x == 0 {
+			// BOTTOM LEFT CELL
+			// fmt.println("BOTTOM LEFT")
+
+			// update_cell_y(cell_i)
+		} else if x == HEIGHT_MAP_SIZE - 1 {
+			// BOTTOM RIGHT
+			// fmt.println("BOTTOM RIGHT")
+
+			// cell_i -= VERTICES_PER_CELL
+
+			// update_cell_y(cell_i)
+		} else {
+			// BOTTOM EDGE
+			// fmt.println("BOTTOM EDGE")
+
+			// Left cell
+			// update_cell_y(cell_i - VERTICES_PER_CELL)
+			// Right cell
+			// update_cell_y(cell_i)
+		}
+	} else if x == 0 {
+		// LEFT EDGE
+		// fmt.println("LEFT EDGE")
+
+		// Top cell
+		// update_cell_y(cell_i - VERTICES_PER_ROW)
+		// Bottom cell
+		// update_cell_y(cell_i)
+	} else if x == HEIGHT_MAP_SIZE - 1 {
+		// RIGHT EDGE
+		// fmt.println("RIGHT EDGE")
+
+		// cell_i -= VERTICES_PER_CELL
+
+		// Top cell
+		// update_cell_y(cell_i - VERTICES_PER_ROW)
+		// Bottom cell
+		// update_cell_y(cell_i)
+	} else {
+		// INTERIOR
+		// fmt.println("INTERIOR")
+
+		// Top left cell
+		// update_cell_y(cell_i - VERTICES_PER_ROW - VERTICES_PER_CELL)
+		// Top right cell
+		// update_cell_y(cell_i - VERTICES_PER_ROW)
+		// Bottom right cell
+		// update_cell_y(cell_i)
+		// Bottom left cell
+		// update_cell_y(cell_i - VERTICES_PER_CELL)
+	}
 }
 
 point_inside_bb :: proc(p: [3]f32, bb: BoundingBox) -> bool {
