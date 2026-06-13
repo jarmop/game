@@ -82,10 +82,22 @@ update_grid :: proc(p: [3]f32) {
 		// INTERIOR
 		// fmt.println("INTERIOR")
 
+		// // Top left cell
+		// update_cell_y(cell_i - VERTICES_PER_ROW - VERTICES_PER_CELL)
+		// // Top right cell
+		// update_cell_y(cell_i - VERTICES_PER_ROW)
+		// // Bottom right cell
+		// update_cell_y(cell_i)
+		// // Bottom left cell
+		// update_cell_y(cell_i - VERTICES_PER_CELL)
+
 		// Top left cell
 		update_cell_y(cell_i - VERTICES_PER_ROW - VERTICES_PER_CELL)
-		// Top right cell
+		// Top center cell
 		update_cell_y(cell_i - VERTICES_PER_ROW)
+		// Top right cell
+		update_cell_y(cell_i - VERTICES_PER_ROW + VERTICES_PER_CELL)
+
 		// Bottom right cell
 		update_cell_y(cell_i)
 		// Bottom left cell
@@ -306,8 +318,8 @@ get_center_y :: proc(top_left, top_right, bottom_left, bottom_right: f32) -> f32
 	// return min(top_left, bottom_right, bottom_left, top_right)
 
 	// VERSION 3
-	total_h := top_left + top_right + bottom_left + bottom_right
-	return total_h / 4
+	// total_h := top_left + top_right + bottom_left + bottom_right
+	// return total_h / 4
 
 	// VERSION 4
 	// }
@@ -334,7 +346,7 @@ get_center_y :: proc(top_left, top_right, bottom_left, bottom_right: f32) -> f32
 
 	// VERSION 5
 	// Y is the average of the highest two opposing corners
-	// return max(top_left + bottom_right, bottom_left + top_right) / 2
+	return max(top_left + bottom_right, bottom_left + top_right) / 2
 }
 
 create_cuboid :: proc(

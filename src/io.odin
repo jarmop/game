@@ -216,6 +216,10 @@ hover :: proc(x, y: f64) {
 
 height_d := 0.0
 
+foo :: proc(d: f32) -> f32 {
+	return (m.cos(d * m.PI) + 1) / 2
+}
+
 drag_on_left_press :: proc(x, y: f64) {
 	if first_cursor_pos_left {
 		prev_cursor_y = y
@@ -226,10 +230,65 @@ drag_on_left_press :: proc(x, y: f64) {
 	step :: 0.1
 	if (abs(height_d) > step) {
 		height_map_pos.y += f32(height_d / abs(height_d) * step)
-		height_map[int(height_map_pos.z)][int(height_map_pos.x)] = height_map_pos.y
+		x := int(height_map_pos.x)
+		z := int(height_map_pos.z)
 
-		// create_grid(ground_vertices[:])
-		update_grid(height_map_pos)
+		// height_map[z][x] = height_map_pos.y
+
+		// r := 2
+		// fmt.println(m.sin_f32(m.PI / 2)) // 1
+		// fmt.println(m.sin_f32(0)) // 0
+
+		// fmt.println(m.cos_f32(0)) // 1
+		// fmt.println(m.cos_f32(m.PI / 2)) // 0
+		// fmt.println(m.cos_f32(m.PI)) // -1
+
+		r: f32 = 4.0
+		d: f32 = 1.0
+
+		// fmt.println(foo(0 / 4))
+		// fmt.println(foo(d / r))
+		fmt.println(foo(0 / r))
+		fmt.println(foo(1 / r))
+		fmt.println(foo(2 / r))
+		fmt.println(foo(3 / r))
+		fmt.println(foo(4 / r))
+
+		y := height_map_pos.y
+		height_map[z][x] = y
+		height_map[z][x + 1] = y * foo(1 / r)
+		height_map[z][x + 2] = y * foo(2 / r)
+		height_map[z][x + 3] = y * foo(3 / r)
+		height_map[z][x + 4] = y * foo(4 / r)
+
+
+		// foo()
+
+		// | distance from p | height | rad
+		// |		r 		 |   0	  | 0 or PI
+		// |		0 		 |	 1	  | PI/2
+
+		// a := height_map_pos.y / 2
+		// b := height_map_pos.y * 1.4 / 2
+
+		// a := height_map_pos.y / 2
+		// b := height_map_pos.y / 1.4 / 2
+
+		// height_map[z - 1][x - 1] = b
+		// height_map[z - 1][x] = a
+		// height_map[z - 1][x + 1] = b
+
+		// height_map[z][x - 1] = a
+		// height_map[z][x] = height_map_pos.y
+		// height_map[z][x + 1] = a
+
+		// height_map[z + 1][x - 1] = b
+		// height_map[z + 1][x] = a
+		// height_map[z + 1][x + 1] = b
+
+
+		create_grid(ground_vertices[:])
+		// update_grid(height_map_pos)
 
 		gl.BindVertexArray(ground_vao)
 		gl.BindBuffer(gl.ARRAY_BUFFER, ground_vbo)
