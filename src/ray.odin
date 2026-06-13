@@ -293,44 +293,18 @@ update_ground_bb_cache :: proc(x: int, z: int) {
 	// fmt.println(cell_i)
 	// fmt.println(p.x, z)
 
+	height := height_map[z][x]
+	cx := x
+	cz := z
+
 	if z == 0 {
 		if x == 0 {
 			// TOP LEFT
 
-			height := height_map[z][x]
-
-			// bb_size = 1
-			// cached_bb := &ground_bb_cache[get_bb_cache_i(x, z, 1)]
-			// bb_updated := false
-			// if cached_bb.max.y < height {
-			// 	cached_bb.max.y = height
-			// 	bb_updated = true
-			// } else if cached_bb.min.y > height {
-			// 	cached_bb.min.y = height
-			// 	bb_updated = true
-			// }
-			// if !bb_updated {
-			// 	fmt.println("not updated 1")
-			// 	return
-			// }
-
-			// // bb_size 2
-			// cached_bb = &ground_bb_cache[get_bb_cache_i(x, z, 2)]
-			// if cached_bb.max.y < height {
-			// 	cached_bb.max.y = height
-			// 	bb_updated = true
-			// } else if cached_bb.min.y > height {
-			// 	cached_bb.min.y = height
-			// 	bb_updated = true
-			// }
-			// if !bb_updated {
-			// 	fmt.println("not updated 2")
-			// 	return
-			// }
 
 			for grid_size := 2; grid_size <= GRID_SIZE; grid_size *= 2 {
 				bb_size := grid_size / 2
-				cached_bb := &ground_bb_cache[get_bb_cache_i(x, z, bb_size)]
+				cached_bb := &ground_bb_cache[get_bb_cache_i(cx, cz, bb_size)]
 				bb_updated := false
 				if cached_bb.max.y < height {
 					cached_bb.max.y = height
@@ -345,16 +319,27 @@ update_ground_bb_cache :: proc(x: int, z: int) {
 				}
 			}
 
-			// update_cell_y(cell_i)
-			// ground_bb_cache[bb_cache_i]
-			// update_bb_in_cache(bb_cache_i)
 		} else if x == HEIGHT_MAP_SIZE - 1 {
 			// TOP RIGHT
-			// fmt.println("TOP RIGHT")
+			cx -= 1
 
-			// cell_i -= VERTICES_PER_CELL
-
-			// update_cell_y(cell_i)
+			height := height_map[z][x]
+			for grid_size := 2; grid_size <= GRID_SIZE; grid_size *= 2 {
+				bb_size := grid_size / 2
+				cached_bb := &ground_bb_cache[get_bb_cache_i(cx, cz, bb_size)]
+				bb_updated := false
+				if cached_bb.max.y < height {
+					cached_bb.max.y = height
+					bb_updated = true
+				} else if cached_bb.min.y > height {
+					cached_bb.min.y = height
+					bb_updated = true
+				}
+				if !bb_updated {
+					fmt.println("not updated", grid_size)
+					break
+				}
+			}
 		} else {
 			// TOP EDGE			
 			// fmt.println("TOP EDGE")
@@ -365,13 +350,31 @@ update_ground_bb_cache :: proc(x: int, z: int) {
 			// update_cell_y(cell_i)
 		}
 	} else if z == HEIGHT_MAP_SIZE - 1 {
-		// cell_i -= VERTICES_PER_ROW
+		cz -= 1
 
 		if x == 0 {
 			// BOTTOM LEFT CELL
 			// fmt.println("BOTTOM LEFT")
 
 			// update_cell_y(cell_i)
+
+			height := height_map[z][x]
+			for grid_size := 2; grid_size <= GRID_SIZE; grid_size *= 2 {
+				bb_size := grid_size / 2
+				cached_bb := &ground_bb_cache[get_bb_cache_i(cx, cz, bb_size)]
+				bb_updated := false
+				if cached_bb.max.y < height {
+					cached_bb.max.y = height
+					bb_updated = true
+				} else if cached_bb.min.y > height {
+					cached_bb.min.y = height
+					bb_updated = true
+				}
+				if !bb_updated {
+					fmt.println("not updated", grid_size)
+					break
+				}
+			}
 		} else if x == HEIGHT_MAP_SIZE - 1 {
 			// BOTTOM RIGHT
 			// fmt.println("BOTTOM RIGHT")
@@ -379,6 +382,25 @@ update_ground_bb_cache :: proc(x: int, z: int) {
 			// cell_i -= VERTICES_PER_CELL
 
 			// update_cell_y(cell_i)
+			cx -= 1
+
+			height := height_map[z][x]
+			for grid_size := 2; grid_size <= GRID_SIZE; grid_size *= 2 {
+				bb_size := grid_size / 2
+				cached_bb := &ground_bb_cache[get_bb_cache_i(cx, cz, bb_size)]
+				bb_updated := false
+				if cached_bb.max.y < height {
+					cached_bb.max.y = height
+					bb_updated = true
+				} else if cached_bb.min.y > height {
+					cached_bb.min.y = height
+					bb_updated = true
+				}
+				if !bb_updated {
+					fmt.println("not updated", grid_size)
+					break
+				}
+			}
 		} else {
 			// BOTTOM EDGE
 			// fmt.println("BOTTOM EDGE")
