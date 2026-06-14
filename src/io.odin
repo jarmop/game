@@ -221,8 +221,8 @@ foo :: proc(d: f32) -> f32 {
 }
 
 edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
-	for z in cz - r ..< cz + r {
-		for x in cx - r ..< cx + r {
+	for z in max(cz - r, 0) ..< min(cz + r, HEIGHT_MAP_SIZE) {
+		for x in max(cx - r, 0) ..< min(cx + r, HEIGHT_MAP_SIZE) {
 			dz := f32(z - cz)
 			dx := f32(x - cx)
 			d := m.sqrt_f32(m.pow(dz, 2) + m.pow(dx, 2))
