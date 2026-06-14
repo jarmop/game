@@ -239,11 +239,15 @@ edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
 			height_map[z][x] += y * foo(d / f32(r))
 		}
 	}
-	for cell in cells_to_update {
-		x := cell[0]
-		z := cell[1]
+
+	// fmt.println(cells_to_update_next_i)
+
+	for i := 0; i < cells_to_update_next_i; i += 1 {
+		x := cells_to_update[i][0]
+		z := cells_to_update[i][1]
 		update_cell(x, z)
 		update_pathfinding_data_xz(x, z)
+		create_cell_bb_in_cache(x, z)
 	}
 }
 
@@ -260,10 +264,7 @@ drag_on_left_press :: proc(x, y: f64) {
 		z := int(height_map_pos.z)
 		y := f32(height_d / abs(height_d) * step)
 		height_map_pos.y += y
-		edit_height_radius(x, z, 4, y)
-
-		// create_grid(ground_vertices[:])
-		// update_grid(x, z)
+		edit_height_radius(x, z, 1, y)
 
 		gl.BindVertexArray(ground_vao)
 		gl.BindBuffer(gl.ARRAY_BUFFER, ground_vbo)
@@ -273,8 +274,6 @@ drag_on_left_press :: proc(x, y: f64) {
 			raw_data(&ground_vertices),
 			gl.STATIC_DRAW,
 		)
-
-		// update_ground_bb_cache(x, z)
 
 		height_d = 0
 	}

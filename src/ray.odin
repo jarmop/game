@@ -281,6 +281,38 @@ update_cell_bb_in_cache :: proc(x, z: int, height: f32) {
 	}
 }
 
+
+create_cell_bb_in_cache :: proc(x0, z0: int) {
+	prev_bb: BoundingBox
+	for grid_size := 2; grid_size <= GRID_SIZE; grid_size *= 2 {
+		bb_size := grid_size / 2
+		x := x0 - x0 % bb_size
+		z := z0 - z0 % bb_size
+
+		bb := create_ground_bb(x, z, bb_size)
+		// x,z is usually different when moving to bigger bb_size
+		ground_bb_cache[get_bb_cache_i(x, z, bb_size)] = bb
+		prev_bb = bb
+
+		fmt.println(bb_size, x, z, bb)
+
+
+		// cached_bb := &ground_bb_cache[get_bb_cache_i(x, z, bb_size)]
+		// bb_updated := false
+		// if cached_bb.max.y < height {
+		// 	cached_bb.max.y = height
+		// 	bb_updated = true
+		// } else if cached_bb.min.y > height {
+		// 	cached_bb.min.y = height
+		// 	bb_updated = true
+		// }
+		// if !bb_updated {
+		// 	// fmt.println("not updated", grid_size)
+		// 	break
+		// }
+	}
+}
+
 // reset_ground_bb_cache :: proc
 
 // Update each bb that contains the point defined by x and z
