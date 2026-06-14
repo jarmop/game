@@ -6,21 +6,21 @@ import m "core:math/linalg"
 /*
 Need to update affected center points as well.
 */
-update_grid :: proc(p: [3]f32) {
+update_grid :: proc(x: int, z: int) {
 	// fmt.println(height_map_point)
 
 
-	cell_i := int(p.z) * VERTICES_PER_ROW + int(p.x) * VERTICES_PER_CELL
+	cell_i := int(z) * VERTICES_PER_ROW + int(x) * VERTICES_PER_CELL
 
 	// fmt.println(cell_i)
-	// fmt.println(p.x, p.z)
+	// fmt.println(x, z)
 
-	if p.z == 0 {
-		if p.x == 0 {
+	if z == 0 {
+		if x == 0 {
 			// TOP LEFT
 
 			update_cell_y(cell_i)
-		} else if p.x == HEIGHT_MAP_SIZE - 1 {
+		} else if x == HEIGHT_MAP_SIZE - 1 {
 			// TOP RIGHT
 			// fmt.println("TOP RIGHT")
 
@@ -36,15 +36,15 @@ update_grid :: proc(p: [3]f32) {
 			// Right cell
 			update_cell_y(cell_i)
 		}
-	} else if p.z == HEIGHT_MAP_SIZE - 1 {
+	} else if z == HEIGHT_MAP_SIZE - 1 {
 		cell_i -= VERTICES_PER_ROW
 
-		if p.x == 0 {
+		if x == 0 {
 			// BOTTOM LEFT CELL
 			// fmt.println("BOTTOM LEFT")
 
 			update_cell_y(cell_i)
-		} else if p.x == HEIGHT_MAP_SIZE - 1 {
+		} else if x == HEIGHT_MAP_SIZE - 1 {
 			// BOTTOM RIGHT
 			// fmt.println("BOTTOM RIGHT")
 
@@ -60,7 +60,7 @@ update_grid :: proc(p: [3]f32) {
 			// Right cell
 			update_cell_y(cell_i)
 		}
-	} else if p.x == 0 {
+	} else if x == 0 {
 		// LEFT EDGE
 		// fmt.println("LEFT EDGE")
 
@@ -68,7 +68,7 @@ update_grid :: proc(p: [3]f32) {
 		update_cell_y(cell_i - VERTICES_PER_ROW)
 		// Bottom cell
 		update_cell_y(cell_i)
-	} else if p.x == HEIGHT_MAP_SIZE - 1 {
+	} else if x == HEIGHT_MAP_SIZE - 1 {
 		// RIGHT EDGE
 		// fmt.println("RIGHT EDGE")
 

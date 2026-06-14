@@ -230,6 +230,7 @@ edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
 				continue
 			}
 			height_map[z][x] += y * foo(d / f32(r))
+			update_grid(x, z)
 		}
 	}
 }
@@ -246,10 +247,11 @@ drag_on_left_press :: proc(x, y: f64) {
 		x := int(height_map_pos.x)
 		z := int(height_map_pos.z)
 		y := f32(height_d / abs(height_d) * step)
+		height_map_pos.y += y
 		edit_height_radius(x, z, 4, y)
 
-		create_grid(ground_vertices[:])
-		// update_grid(height_map_pos)
+		// create_grid(ground_vertices[:])
+		// update_grid(x, z)
 
 		gl.BindVertexArray(ground_vao)
 		gl.BindBuffer(gl.ARRAY_BUFFER, ground_vbo)
@@ -260,9 +262,9 @@ drag_on_left_press :: proc(x, y: f64) {
 			gl.STATIC_DRAW,
 		)
 
-		update_pathfinding_data(height_map_pos)
+		// update_pathfinding_data(height_map_pos)
 
-		update_ground_bb_cache(int(height_map_pos.x), int(height_map_pos.z))
+		// update_ground_bb_cache(x, z)
 
 		height_d = 0
 	}
