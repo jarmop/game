@@ -1,8 +1,6 @@
 package game
 
 import "base:runtime"
-import "core:fmt"
-import m "core:math"
 import l "core:math/linalg"
 import gl "vendor:OpenGL"
 import "vendor:glfw"
@@ -214,66 +212,13 @@ hover :: proc(x, y: f64) {
 	}
 }
 
-height_d := 0.0
-
-foo :: proc(d: f32) -> f32 {
-	return (m.cos(d * m.PI) + 1) / 2
-}
-
-edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
-	MAX_RADIUS :: 8
-	cells_to_update: [2 * MAX_RADIUS * 2 * MAX_RADIUS][2]int
-	cells_to_update_next_i := 0
-	for z in max(cz - r, 0) ..< min(cz + r, HEIGHT_MAP_SIZE) {
-		for x in max(cx - r, 0) ..< min(cx + r, HEIGHT_MAP_SIZE) {
-			if x < GRID_SIZE && z < GRID_SIZE {
-				cells_to_update[cells_to_update_next_i] = {x, z}
-				cells_to_update_next_i += 1
-			}
-			dz := f32(z - cz)
-			dx := f32(x - cx)
-			d := m.sqrt_f32(m.pow(dz, 2) + m.pow(dx, 2))
-			if d > f32(r) {
-				continue
-			}
-			height_map[z][x] += y * foo(d / f32(r))
-		}
-	}
-	for i := 0; i < cells_to_update_next_i; i += 1 {
-		x := cells_to_update[i][0]
-		z := cells_to_update[i][1]
-		update_cell(x, z)
-		update_pathfinding_data_xz(x, z)
-		reset_cell_bb_in_cache(x, z)
-	}
-}
-
 drag_on_left_press :: proc(x, y: f64) {
 	if first_cursor_pos_left {
 		prev_cursor_y = y
 		first_cursor_pos_left = false
 	}
 
-	height_d -= (y - prev_cursor_y) * 0.01
-	step :: 0.1
-	if (abs(height_d) > step) {
-		x := int(height_map_pos.x)
-		z := int(height_map_pos.z)
-		y := f32(height_d / abs(height_d) * step)
-		height_map_pos.y += y
-		edit_height_radius(x, z, 4, y)
-
-		gl.BindVertexArray(ground_vao)
-		gl.BindBuffer(gl.ARRAY_BUFFER, ground_vbo)
-		gl.BufferData(
-			gl.ARRAY_BUFFER,
-			size_of(ground_vertices),
-			raw_data(&ground_vertices),
-			gl.STATIC_DRAW,
-		)
-
-		height_d = 0
-	}
+	edit_height_map(y)
 
 	prev_cursor_y = y
 }
