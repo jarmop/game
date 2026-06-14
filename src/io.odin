@@ -221,8 +221,15 @@ foo :: proc(d: f32) -> f32 {
 }
 
 edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
+	MAX_RADIUS :: 8
+	cells_to_update: [2 * MAX_RADIUS * 2 * MAX_RADIUS][2]int
+	cells_to_update_next_i := 0
 	for z in max(cz - r, 0) ..< min(cz + r, HEIGHT_MAP_SIZE) {
 		for x in max(cx - r, 0) ..< min(cx + r, HEIGHT_MAP_SIZE) {
+			if x < GRID_SIZE && z < GRID_SIZE {
+				cells_to_update[cells_to_update_next_i] = {x, z}
+				cells_to_update_next_i += 1
+			}
 			dz := f32(z - cz)
 			dx := f32(x - cx)
 			d := m.sqrt_f32(m.pow(dz, 2) + m.pow(dx, 2))
@@ -230,8 +237,10 @@ edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
 				continue
 			}
 			height_map[z][x] += y * foo(d / f32(r))
-			update_grid(x, z)
 		}
+	}
+	for cell in cells_to_update {
+		update_cell(cell[0], cell[1])
 	}
 }
 

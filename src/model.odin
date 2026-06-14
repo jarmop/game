@@ -3,6 +3,11 @@ package game
 import "core:fmt"
 import m "core:math/linalg"
 
+update_cell :: proc(x: int, z: int) {
+	cell_i := z * VERTICES_PER_ROW + x * VERTICES_PER_CELL
+	update_cell_y(cell_i)
+}
+
 /*
 Need to update affected center points as well.
 */
@@ -10,7 +15,7 @@ update_grid :: proc(x: int, z: int) {
 	// fmt.println(height_map_point)
 
 
-	cell_i := int(z) * VERTICES_PER_ROW + int(x) * VERTICES_PER_CELL
+	cell_i := z * VERTICES_PER_ROW + x * VERTICES_PER_CELL
 
 	// fmt.println(cell_i)
 	// fmt.println(x, z)
