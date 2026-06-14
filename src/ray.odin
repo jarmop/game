@@ -198,8 +198,6 @@ empty_bb: BoundingBox
 	4k: 4 + 16 + 64 + 256 + 1k
 	16k: 4 + 16 + 64 + 256 + 1k + 4k
 	64k: 4 + 16 + 64 + 256 + 1k + 4k + 16k
-	
-	
 */
 get_bb_cache_offset :: proc(bb_size: int) -> int {
 	grid_size := bb_size * 2
@@ -262,124 +260,6 @@ get_bb_from_cache :: proc(x: int, z: int, bb_size: int) -> BoundingBox {
 	return bb
 }
 
-update_cell_bb_in_cache :: proc(x, z: int, height: f32) {
-	for grid_size := 2; grid_size <= GRID_SIZE; grid_size *= 2 {
-		bb_size := grid_size / 2
-		cached_bb := &ground_bb_cache[get_bb_cache_i(x, z, bb_size)]
-		bb_updated := false
-		if cached_bb.max.y < height {
-			cached_bb.max.y = height
-			bb_updated = true
-		} else if cached_bb.min.y > height {
-			cached_bb.min.y = height
-			bb_updated = true
-		}
-		if !bb_updated {
-			// fmt.println("not updated", grid_size)
-			break
-		}
-	}
-}
-
-
-create_cell_bb_in_cache :: proc(x0, z0: int) {
-	prev_bb: BoundingBox
-	for grid_size := 2; grid_size <= GRID_SIZE; grid_size *= 2 {
-		bb_size := grid_size / 2
-		x := x0 - x0 % bb_size
-		z := z0 - z0 % bb_size
-
-		bb := create_ground_bb(x, z, bb_size)
-		// x,z is usually different when moving to bigger bb_size
-		ground_bb_cache[get_bb_cache_i(x, z, bb_size)] = bb
-		prev_bb = bb
-
-		fmt.println(bb_size, x, z, bb)
-
-
-		// cached_bb := &ground_bb_cache[get_bb_cache_i(x, z, bb_size)]
-		// bb_updated := false
-		// if cached_bb.max.y < height {
-		// 	cached_bb.max.y = height
-		// 	bb_updated = true
-		// } else if cached_bb.min.y > height {
-		// 	cached_bb.min.y = height
-		// 	bb_updated = true
-		// }
-		// if !bb_updated {
-		// 	// fmt.println("not updated", grid_size)
-		// 	break
-		// }
-	}
-}
-
-// reset_ground_bb_cache :: proc
-
-// Update each bb that contains the point defined by x and z
-update_ground_bb_cache :: proc(x: int, z: int) {
-	height := height_map[z][x]
-
-	if z == 0 {
-		if x == 0 {
-			// TOP LEFT
-			update_cell_bb_in_cache(x, z, height)
-		} else if x == HEIGHT_MAP_SIZE - 1 {
-			// TOP RIGHT
-			update_cell_bb_in_cache(x - 1, z, height)
-		} else {
-			// TOP EDGE
-			// Left cell
-			update_cell_bb_in_cache(x - 1, z, height)
-			// Right cell
-			update_cell_bb_in_cache(x, z, height)
-		}
-	} else if z == HEIGHT_MAP_SIZE - 1 {
-		if x == 0 {
-			update_cell_bb_in_cache(x, z - 1, height)
-		} else if x == HEIGHT_MAP_SIZE - 1 {
-			// BOTTOM RIGHT
-			update_cell_bb_in_cache(x - 1, z - 1, height)
-		} else {
-			// BOTTOM EDGE
-			// Left cell
-			update_cell_bb_in_cache(x - 1, z - 1, height)
-			// Right cell
-			update_cell_bb_in_cache(x, z - 1, height)
-		}
-	} else if x == 0 {
-		// LEFT EDGE
-		// Top cell
-		update_cell_bb_in_cache(x, z - 1, height)
-		// Bottom cell
-		update_cell_bb_in_cache(x, z, height)
-	} else if x == HEIGHT_MAP_SIZE - 1 {
-		// RIGHT EDGE
-		// Top cell
-		update_cell_bb_in_cache(x - 1, z - 1, height)
-		// Bottom cell
-		update_cell_bb_in_cache(x - 1, z, height)
-	} else {
-		// INTERIOR
-		// fmt.println("INTERIOR")
-
-		// Top left cell
-		// update_cell_y(cell_i - VERTICES_PER_ROW - VERTICES_PER_CELL)
-		update_cell_bb_in_cache(x - 1, z - 1, height)
-
-		// Top right cell
-		// update_cell_y(cell_i - VERTICES_PER_ROW)
-		update_cell_bb_in_cache(x, z - 1, height)
-
-		// Bottom right cell
-		// update_cell_y(cell_i)
-		update_cell_bb_in_cache(x, z, height)
-
-		// Bottom left cell
-		// update_cell_y(cell_i - VERTICES_PER_CELL)
-		update_cell_bb_in_cache(x - 1, z, height)
-	}
-}
-
 point_inside_bb :: proc(p: [3]f32, bb: BoundingBox) -> bool {
 	return(
 		p.x >= bb.min.x &&
@@ -390,3 +270,97 @@ point_inside_bb :: proc(p: [3]f32, bb: BoundingBox) -> bool {
 		p.z <= bb.max.z \
 	)
 }
+
+reset_cell_bb_in_cache :: proc(x0, z0: int) {
+	for grid_size := 2; grid_size <= GRID_SIZE; grid_size *= 2 {
+		bb_size := grid_size / 2
+		x := x0 - x0 % bb_size
+		z := z0 - z0 % bb_size
+
+		ground_bb_cache[get_bb_cache_i(x, z, bb_size)] = empty_bb
+	}
+}
+
+// update_cell_bb_in_cache :: proc(x, z: int, height: f32) {
+// 	for grid_size := 2; grid_size <= GRID_SIZE; grid_size *= 2 {
+// 		bb_size := grid_size / 2
+// 		cached_bb := &ground_bb_cache[get_bb_cache_i(x, z, bb_size)]
+// 		bb_updated := false
+// 		if cached_bb.max.y < height {
+// 			cached_bb.max.y = height
+// 			bb_updated = true
+// 		} else if cached_bb.min.y > height {
+// 			cached_bb.min.y = height
+// 			bb_updated = true
+// 		}
+// 		if !bb_updated {
+// 			// fmt.println("not updated", grid_size)
+// 			break
+// 		}
+// 	}
+// }
+
+// // Update each bb that contains the point defined by x and z
+// update_ground_bb_cache :: proc(x: int, z: int) {
+// 	height := height_map[z][x]
+
+// 	if z == 0 {
+// 		if x == 0 {
+// 			// TOP LEFT
+// 			update_cell_bb_in_cache(x, z, height)
+// 		} else if x == HEIGHT_MAP_SIZE - 1 {
+// 			// TOP RIGHT
+// 			update_cell_bb_in_cache(x - 1, z, height)
+// 		} else {
+// 			// TOP EDGE
+// 			// Left cell
+// 			update_cell_bb_in_cache(x - 1, z, height)
+// 			// Right cell
+// 			update_cell_bb_in_cache(x, z, height)
+// 		}
+// 	} else if z == HEIGHT_MAP_SIZE - 1 {
+// 		if x == 0 {
+// 			update_cell_bb_in_cache(x, z - 1, height)
+// 		} else if x == HEIGHT_MAP_SIZE - 1 {
+// 			// BOTTOM RIGHT
+// 			update_cell_bb_in_cache(x - 1, z - 1, height)
+// 		} else {
+// 			// BOTTOM EDGE
+// 			// Left cell
+// 			update_cell_bb_in_cache(x - 1, z - 1, height)
+// 			// Right cell
+// 			update_cell_bb_in_cache(x, z - 1, height)
+// 		}
+// 	} else if x == 0 {
+// 		// LEFT EDGE
+// 		// Top cell
+// 		update_cell_bb_in_cache(x, z - 1, height)
+// 		// Bottom cell
+// 		update_cell_bb_in_cache(x, z, height)
+// 	} else if x == HEIGHT_MAP_SIZE - 1 {
+// 		// RIGHT EDGE
+// 		// Top cell
+// 		update_cell_bb_in_cache(x - 1, z - 1, height)
+// 		// Bottom cell
+// 		update_cell_bb_in_cache(x - 1, z, height)
+// 	} else {
+// 		// INTERIOR
+// 		// fmt.println("INTERIOR")
+
+// 		// Top left cell
+// 		// update_cell_y(cell_i - VERTICES_PER_ROW - VERTICES_PER_CELL)
+// 		update_cell_bb_in_cache(x - 1, z - 1, height)
+
+// 		// Top right cell
+// 		// update_cell_y(cell_i - VERTICES_PER_ROW)
+// 		update_cell_bb_in_cache(x, z - 1, height)
+
+// 		// Bottom right cell
+// 		// update_cell_y(cell_i)
+// 		update_cell_bb_in_cache(x, z, height)
+
+// 		// Bottom left cell
+// 		// update_cell_y(cell_i - VERTICES_PER_CELL)
+// 		update_cell_bb_in_cache(x - 1, z, height)
+// 	}
+// }
