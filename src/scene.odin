@@ -193,7 +193,6 @@ init_scene :: proc() {
 	init_vertices(&path_vbo, &path_vao, raw_data(path_vertices), size_of(path_vertices))
 
 	// HEIGHT MAP
-	height_map_vbo: u32
 	gl.GenVertexArrays(1, &height_map_vao)
 	gl.BindVertexArray(height_map_vao)
 	gl.GenBuffers(1, &height_map_vbo)
@@ -201,10 +200,10 @@ init_scene :: proc() {
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, size_of(LineVertex), 0)
 	gl.EnableVertexAttribArray(0)
 	height_map_vertices: []LineVertex = {
-		{pos = {-0.5, 0, 0}},
-		{pos = {0.5, 0, 0}},
-		{pos = {0, 0, -0.5}},
-		{pos = {0, 0, 0.5}},
+		{pos = {-f32(map_edit_radius), 0, 0}},
+		{pos = {f32(map_edit_radius), 0, 0}},
+		{pos = {0, 0, -f32(map_edit_radius)}},
+		{pos = {0, 0, f32(map_edit_radius)}},
 	}
 	gl.BufferData(
 		gl.ARRAY_BUFFER,
@@ -433,7 +432,7 @@ draw_scene :: proc() {
 	shader_set_mat4(line_shader_program, "view", view)
 	shader_set_mat4(line_shader_program, "projection", projection)
 	model = 1
-	model *= glsl.mat4Translate(height_map_pos)
+	model *= glsl.mat4Translate(height_map_pos) //
 	shader_set_mat4(line_shader_program, "model", model)
 	shader_set_vec3(line_shader_program, "color", {1.0, 0.0, 0.0})
 	gl.BindVertexArray(height_map_vao)

@@ -1,8 +1,11 @@
 package game
 
+import "core:fmt"
 import "core:math"
 import gl "vendor:OpenGL"
 
+MAX_MAP_EDIT_RADIUS :: 32
+map_edit_radius := 8
 height_d := 0.0
 
 // Decrease y value in the shape of a (co)sine wave as it gets further from the
@@ -17,8 +20,7 @@ y_modifier :: proc(d: f32) -> f32 {
 }
 
 edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
-	MAX_RADIUS :: 8
-	cells_to_update: [2 * MAX_RADIUS * 2 * MAX_RADIUS][2]int
+	cells_to_update: [2 * MAX_MAP_EDIT_RADIUS * 2 * MAX_MAP_EDIT_RADIUS][2]int
 	cells_to_update_next_i := 0
 	for z in max(cz - r, 0) ..< min(cz + r, HEIGHT_MAP_SIZE) {
 		for x in max(cx - r, 0) ..< min(cx + r, HEIGHT_MAP_SIZE) {
@@ -52,7 +54,7 @@ edit_height_map :: proc(y: f64) {
 		z := int(height_map_pos.z)
 		y := f32(height_d / abs(height_d) * step)
 		height_map_pos.y += y
-		edit_height_radius(x, z, 8, y)
+		edit_height_radius(x, z, map_edit_radius, y)
 
 		gl.BindVertexArray(ground_vao)
 		gl.BindBuffer(gl.ARRAY_BUFFER, ground_vbo)
@@ -65,4 +67,23 @@ edit_height_map :: proc(y: f64) {
 
 		height_d = 0
 	}
+}
+
+add_to_map_edit_radius :: proc(value: int) {
+	map_edit_radius = max(min(map_edit_radius + value, MAX_MAP_EDIT_RADIUS), 1)
+
+	gl.BindVertexArray(height_map_vao)
+	gl.BindBuffer(gl.ARRAY_BUFFER, height_map_vbo)
+	height_map_vertices: []LineVertex = {
+		{pos = {-f32(map_edit_radius), 0, 0}},
+		{pos = {f32(map_edit_radius), 0, 0}},
+		{pos = {0, 0, -f32(map_edit_radius)}},
+		{pos = {0, 0, f32(map_edit_radius)}},
+	}
+	gl.BufferData(
+		gl.ARRAY_BUFFER,
+		len(height_map_vertices) * size_of(LineVertex),
+		raw_data(height_map_vertices),
+		gl.STATIC_DRAW,
+	)
 }

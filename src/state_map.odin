@@ -48,6 +48,7 @@ GRID_SIZE :: 256
 HEIGHT_MAP_SIZE :: GRID_SIZE + 1
 height_map: [HEIGHT_MAP_SIZE][HEIGHT_MAP_SIZE]f32
 empty_map: [HEIGHT_MAP_SIZE][HEIGHT_MAP_SIZE]f32
+height_map_vbo: u32
 height_map_vao: u32
 hx := GRID_SIZE / 2
 hz := GRID_SIZE / 2

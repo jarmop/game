@@ -18,8 +18,15 @@ init_io :: proc() {
 	glfw.SetFramebufferSizeCallback(window, framebuffer_size_callback)
 	glfw.SetMouseButtonCallback(window, mouse_button_callback)
 	glfw.SetCursorPosCallback(window, cursor_pos_callback)
+	glfw.SetScrollCallback(window, scroll_callback)
 
 	update_camera()
+}
+
+scroll_callback :: proc "c" (window: glfw.WindowHandle, xoffset: f64, yoffset: f64) {
+	context = runtime.default_context()
+	// fmt.println(xoffset, yoffset)
+	add_to_map_edit_radius(int(yoffset))
 }
 
 key_callback :: proc "c" (window: glfw.WindowHandle, key, scancode, action, mode: i32) {
