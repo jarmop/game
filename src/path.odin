@@ -32,19 +32,19 @@ create_pathfinding_data :: proc() {
 	}
 }
 
-update_pathfinding_data :: proc(p: [3]f32) {
+update_pathfinding_data :: proc(x, z: int) {
 	// fmt.println("----------")
-	cell_i := int(p.z) * GRID_SIZE + int(p.x)
+	cell_i := z * GRID_SIZE + x
 
 	// fmt.println(cell_i)
-	// fmt.println(p.x, p.z)
+	// fmt.println(x, z)
 
-	if p.z == 0 {
-		if p.x == 0 {
+	if z == 0 {
+		if x == 0 {
 			// TOP LEFT
 
 			update_pathfinding_data_cell(cell_i)
-		} else if p.x == HEIGHT_MAP_SIZE - 1 {
+		} else if x == HEIGHT_MAP_SIZE - 1 {
 			// TOP RIGHT
 			// fmt.println("TOP RIGHT")
 
@@ -60,15 +60,15 @@ update_pathfinding_data :: proc(p: [3]f32) {
 			// Right cell
 			update_pathfinding_data_cell(cell_i)
 		}
-	} else if p.z == HEIGHT_MAP_SIZE - 1 {
+	} else if z == HEIGHT_MAP_SIZE - 1 {
 		cell_i -= GRID_SIZE
 
-		if p.x == 0 {
+		if x == 0 {
 			// BOTTOM LEFT CELL
 			// fmt.println("BOTTOM LEFT")
 
 			update_pathfinding_data_cell(cell_i)
-		} else if p.x == HEIGHT_MAP_SIZE - 1 {
+		} else if x == HEIGHT_MAP_SIZE - 1 {
 			// BOTTOM RIGHT
 			// fmt.println("BOTTOM RIGHT")
 
@@ -84,7 +84,7 @@ update_pathfinding_data :: proc(p: [3]f32) {
 			// Right cell
 			update_pathfinding_data_cell(cell_i)
 		}
-	} else if p.x == 0 {
+	} else if x == 0 {
 		// LEFT EDGE
 		// fmt.println("LEFT EDGE")
 
@@ -92,7 +92,7 @@ update_pathfinding_data :: proc(p: [3]f32) {
 		update_pathfinding_data_cell(cell_i - GRID_SIZE)
 		// Bottom cell
 		update_pathfinding_data_cell(cell_i)
-	} else if p.x == HEIGHT_MAP_SIZE - 1 {
+	} else if x == HEIGHT_MAP_SIZE - 1 {
 		// RIGHT EDGE
 		// fmt.println("RIGHT EDGE")
 
@@ -115,6 +115,10 @@ update_pathfinding_data :: proc(p: [3]f32) {
 		// Bottom left cell
 		update_pathfinding_data_cell(cell_i - 1)
 	}
+}
+
+update_pathfinding_data_xz :: proc(x, z: int) {
+	update_pathfinding_data_cell(z * GRID_SIZE + x)
 }
 
 update_pathfinding_data_cell :: proc(cell_i: int) {

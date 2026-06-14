@@ -240,7 +240,10 @@ edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
 		}
 	}
 	for cell in cells_to_update {
-		update_cell(cell[0], cell[1])
+		x := cell[0]
+		z := cell[1]
+		update_cell(x, z)
+		update_pathfinding_data_xz(x, z)
 	}
 }
 
@@ -271,13 +274,10 @@ drag_on_left_press :: proc(x, y: f64) {
 			gl.STATIC_DRAW,
 		)
 
-		// update_pathfinding_data(height_map_pos)
-
 		// update_ground_bb_cache(x, z)
 
 		height_d = 0
 	}
-
 
 	prev_cursor_y = y
 }
