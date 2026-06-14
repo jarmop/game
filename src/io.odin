@@ -229,7 +229,7 @@ edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
 			if d > f32(r) {
 				continue
 			}
-			height_map[z][x] = y * foo(d / f32(r))
+			height_map[z][x] += y * foo(d / f32(r))
 		}
 	}
 }
@@ -243,16 +243,10 @@ drag_on_left_press :: proc(x, y: f64) {
 	height_d -= (y - prev_cursor_y) * 0.01
 	step :: 0.1
 	if (abs(height_d) > step) {
-		height_map_pos.y += f32(height_d / abs(height_d) * step)
 		x := int(height_map_pos.x)
 		z := int(height_map_pos.z)
-
-		// r: f32 = 8.0
-		// d: f32 = 1.0
-
-		y := height_map_pos.y
-		edit_height_radius(x, z, 8, y)
-
+		y := f32(height_d / abs(height_d) * step)
+		edit_height_radius(x, z, 4, y)
 
 		create_grid(ground_vertices[:])
 		// update_grid(height_map_pos)
