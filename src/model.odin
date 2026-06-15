@@ -182,7 +182,7 @@ update_cell_y :: proc(grid_i: int) {
 	}
 }
 
-create_grid :: proc(vertices: []Vertex) {
+create_grid :: proc(vertices: []Vertex, grid_size: int) {
 	uv_low: f32 = 0.0
 	uv_high: f32 = 1.0
 	// uv_high: f32 = 0.0
@@ -213,13 +213,13 @@ create_grid :: proc(vertices: []Vertex) {
 		texture = {uv_high / 2, uv_high / 2},
 	}
 	grid_i := 0
-	for i := 0; i < GRID_SIZE; i += 1 {
+	for i := 0; i < grid_size; i += 1 {
 		top_left.pos.x = 0
 		top_right.pos.x = 1
 		bottom_left.pos.x = 0
 		bottom_right.pos.x = 1
 		center.pos.x = 0.5
-		for j := 0; j < GRID_SIZE; j += 1 {
+		for j := 0; j < grid_size; j += 1 {
 			top_left.pos.y = height_map[i][j]
 			top_right.pos.y = height_map[i][j + 1]
 			bottom_left.pos.y = height_map[i + 1][j]

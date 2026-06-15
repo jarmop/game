@@ -59,44 +59,22 @@ init_scene :: proc() {
 	}
 
 	// GROUND
-	// for row in height_map {
-	// 	for y in row {
-	// 		if y > GROUND_BB.max.y {
-	// 			GROUND_BB.max.y = y
-	// 		}
-	// 	}
-	// }
-
-	// ground_vbo: u32
-	create_grid(ground_vertices[:])
+	create_grid(ground_vertices[:], GRID_SIZE)
 	init_vertices(&ground_vbo, &ground_vao, raw_data(&ground_vertices), size_of(ground_vertices))
 
-	// for v& in ground_vertices_cell {
-	// 	fmt.println(v)
-	// }
+	ground2_vbo: u32
+	// Less detailed, so fewer vertices? Do that only as a later optimization.
+	// 16 times bigger area, but 4 times bigger cell so only 4 times the amount of vertices
+	ground2_vertices: [GROUND_VERTICES_COUNT * 16]Vertex
+	create_grid(ground2_vertices[:], BACKGROUND_SIZE)
+	init_vertices(
+		&ground2_vbo,
+		&ground2_vao,
+		raw_data(&ground2_vertices),
+		size_of(ground2_vertices),
+	)
 
 	ground_vbo_grid: u32
-	// for &v, x in ground_vertices_cell {
-	// 	ground_vertices_cell[x] = ground_vertices[x * VERTICES_PER_TRIANGLE]
-	// 	fmt.println(ground_vertices_cell[x].pos)
-	// }
-	// init_vertices(
-	// 	&ground_vbo_cell,
-	// 	&ground_vao_cell,
-	// 	raw_data(&ground_vertices_cell),
-	// 	size_of(ground_vertices),
-	// )
-
-	// for X := 0; X < GRID_SIZE * 2; X += 2 {
-	// for x := 0; x < GRID_SIZE - 1; x += 1 {
-	// 	ground_vertices_grid[x * 2] = {
-	// 		pos = {f32(x + 1), 0, 0},
-	// 	}
-	// 	ground_vertices_grid[x * 2 + 1] = {
-	// 		pos = {f32(x + 1), 0, CELL_SIZE},
-	// 	}
-	// 	// fmt.println(ground_vertices_grid[x].pos)
-	// }
 
 	v_i := 0
 	for z in 0 ..< GRID_SIZE {
@@ -216,10 +194,10 @@ init_scene :: proc() {
 	stbi.set_flip_vertically_on_load(1)
 	width, height, nrChannels: i32
 	// data := stbi.load("./assets/rubber.jpg", &width, &height, &nrChannels, 0)
-	data := stbi.load("./assets/grass.jpg", &width, &height, &nrChannels, 0)
+	// data := stbi.load("./assets/grass.jpg", &width, &height, &nrChannels, 0)
 	// data := stbi.load("./assets/grid.jpg", &width, &height, &nrChannels, 0)
 	// data := stbi.load("./assets/grid_thick.jpg", &width, &height, &nrChannels, 0)
-	// data := stbi.load("./assets/grid_3_px.jpg", &width, &height, &nrChannels, 0)
+	data := stbi.load("./assets/grid_3_px.jpg", &width, &height, &nrChannels, 0)
 	// data := stbi.load("./assets/tiles.jpg", &width, &height, &nrChannels, 0)
 	if data == nil {
 		fmt.println("Failed to load texture")
@@ -323,7 +301,7 @@ draw_scene :: proc() {
 		shader_set_mat4(texture_shader_program, "model", model)
 		shader_set_vec3(texture_shader_program, "color", {1.0, 1.0, 1.0})
 		gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
-		gl.DrawArrays(gl.TRIANGLES, 0, GRID_SIZE * GRID_SIZE * 12)
+		gl.DrawArrays(gl.TRIANGLES, 0, GROUND_VERTICES_COUNT)
 	} else {
 		// BACKGROUND FOR THE WIREFRAME
 		use_color_shader(view, projection)
@@ -335,7 +313,7 @@ draw_scene :: proc() {
 		shader_set_vec3(color_shader_program, "color", {1.0, 0.75, 0.5})
 		// shader_set_vec3(color_shader_program, "color", {1.6, 1.2, 0.8})
 		gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
-		gl.DrawArrays(gl.TRIANGLES, 0, GRID_SIZE * GRID_SIZE * 12)
+		gl.DrawArrays(gl.TRIANGLES, 0, GROUND_VERTICES_COUNT)
 
 		if SHOW_GROUND_WIREFRAME {
 			// tHE WIREFRAME
@@ -347,13 +325,21 @@ draw_scene :: proc() {
 			// shader_set_vec3(color_shader_program, "color", {0.0, 0.0, 0.0})
 			gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 			gl.LineWidth(2.0)
-			gl.DrawArrays(gl.TRIANGLES, 0, GRID_SIZE * GRID_SIZE * 12)
+			gl.DrawArrays(gl.TRIANGLES, 0, GROUND_VERTICES_COUNT)
 			// gl.DrawArrays(gl.LINES, 0, GRID_SIZE * GRID_SIZE * 12)
 			// gl.DrawArrays(gl.LINE_STRIP, 0, GRID_SIZE * GRID_SIZE * 12)
 			// gl.DrawArrays(gl.LINE_STRIP_ADJACENCY, 0, GRID_SIZE * GRID_SIZE * 12)
 			gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 		}
 	}
+
+	// BACKGROUND
+	gl.BindVertexArray(ground2_vao)
+	model = 1
+	// BACKGROUND_POS: [3]f32 : {0, 0, 0}
+	model *= glsl.mat4Translate(GROUND_POSITION + {-3 * GRID_SIZE / 2, 0, -3 * GRID_SIZE / 2})
+	shader_set_mat4(texture_shader_program, "model", model)
+	gl.DrawArrays(gl.TRIANGLES, 0, GROUND_VERTICES_COUNT * 16)
 
 	// WALL
 	use_color_shader(view, projection)

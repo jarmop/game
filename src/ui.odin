@@ -118,6 +118,16 @@ draw_ui :: proc() {
 		PADDING,
 		LINE_HEIGHT + 120,
 	)
+	draw_text(
+		fmt.tprintf(
+			"Marker pos: %.1f, %.1f, %.1f",
+			height_map_pos.x,
+			height_map_pos.y,
+			height_map_pos.z,
+		),
+		PADDING,
+		LINE_HEIGHT + 140,
+	)
 
 }
 

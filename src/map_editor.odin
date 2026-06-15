@@ -5,7 +5,7 @@ import "core:math"
 import gl "vendor:OpenGL"
 
 MAX_MAP_EDIT_RADIUS :: 32
-map_edit_radius := 8
+map_edit_radius := 1
 height_d := 0.0
 
 // Decrease y value in the shape of a (co)sine wave as it gets further from the
