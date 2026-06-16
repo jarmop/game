@@ -18,7 +18,9 @@ y_modifier :: proc(d: f32) -> f32 {
 	return (math.cos(d * math.PI) + 1) / 2
 }
 
-edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
+edit_height_radius :: proc(px: int, pz: int, r: int, y: f32) {
+	cx := px - GRID_OFFSET
+	cz := pz - GRID_OFFSET
 	cells_to_update: [2 * MAX_MAP_EDIT_RADIUS * 2 * MAX_MAP_EDIT_RADIUS][2]int
 	cells_to_update_next_i := 0
 	for z in max(cz - r, 0) ..< min(cz + r, HEIGHT_MAP_EDIT_SIZE) {

@@ -50,7 +50,7 @@ package game
 // // used for pathfinding, and bb cache
 
 GRID_SIZE :: 4
-GRID_OFFSET :: 3 * GRID_SIZE / 2
+GRID_OFFSET: int = int(CELL_SIZE)
 BORDER_SIZE :: GRID_SIZE / 4
 BACKGROUND_SIZE :: 4 * GRID_SIZE
 
@@ -60,29 +60,20 @@ height_map_bg: [HEIGHT_MAP_BG_SIZE * HEIGHT_MAP_BG_SIZE]f32
 height_map_edit: [HEIGHT_MAP_EDIT_SIZE * HEIGHT_MAP_EDIT_SIZE]f32
 empty_map: [HEIGHT_MAP_BG_SIZE * HEIGHT_MAP_BG_SIZE]f32
 
-height_map_pos_vbo: u32
-height_map_pos_vao: u32
-height_map_pos_x := GRID_SIZE / 2
-height_map_pos_z := GRID_SIZE / 2
-height_map_pos: [3]f32 = {
-	f32(height_map_pos_x),
-	height_map_edit[height_map_pos_z * HEIGHT_MAP_EDIT_SIZE + height_map_pos_x],
-	f32(height_map_pos_z),
-}
-
 CELL_SIZE :: 1.0
 GROUND_SIZE :: GRID_SIZE * CELL_SIZE
-GROUND_DIMENSIONS :: [3]f32{GROUND_SIZE, 0.01, GROUND_SIZE}
-GROUND_POSITION :: [3]f32{0.0, -GROUND_DIMENSIONS.y, 0.0}
+GROUND_BG_POSITION :: [3]f32{0.0, -0.01, 0.0}
+// GROUND_POSITION := [3]f32 {
+// 	GROUND_BG_POSITION.x + GRID_OFFSET,
+// 	GROUND_BG_POSITION.y,
+// 	GROUND_BG_POSITION.z + GRID_OFFSET,
+// }
+GROUND_POSITION := GROUND_BG_POSITION + {f32(GRID_OFFSET), 0, f32(GRID_OFFSET)}
+
 // SHOW_GROUND_WIREFRAME :: false
 SHOW_GROUND_WIREFRAME :: true
 SHOW_GROUND_TEXTURE :: false
 // SHOW_GROUND_TEXTURE :: true
-
-// GROUND_BB := BoundingBox {
-// 	min = GROUND_POSITION,
-// 	max = GROUND_POSITION + GROUND_DIMENSIONS,
-// }
 
 GRID_BBS: [GRID_SIZE * GRID_SIZE]BoundingBox
 
@@ -104,6 +95,16 @@ ground2_vertices: [GROUND_VERTICES_COUNT * 16]Vertex
 ground_vertices_grid: [GRID_SIZE * 2 * GRID_SIZE * 2]Vertex
 
 ground_bg_vao: u32
+
+height_map_pos_vbo: u32
+height_map_pos_vao: u32
+height_map_pos_x := GRID_SIZE / 2
+height_map_pos_z := GRID_SIZE / 2
+height_map_pos: [3]f32 = {
+	f32(height_map_pos_x),
+	height_map_edit[height_map_pos_z * HEIGHT_MAP_EDIT_SIZE + height_map_pos_x],
+	f32(height_map_pos_z),
+}
 
 // -------------- WALL --------------
 WALL_X_DIMENSIONS :: [3]f32{1.2, 2.0, 0.2}
