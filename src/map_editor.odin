@@ -35,6 +35,7 @@ edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
 				continue
 			}
 			height_map[z][x] += y * y_modifier(d / f32(r))
+			// height_map[z + GRID_OFFSET][x + GRID_OFFSET] += y * y_modifier(d / f32(r))
 		}
 	}
 	for i := 0; i < cells_to_update_next_i; i += 1 {

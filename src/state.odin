@@ -82,6 +82,7 @@ init_state :: proc() {
 
 save_state :: proc() {
 	// empty_map: [GRID_SIZE + 1][GRID_SIZE + 1]f32
+	// empty_map: [BACKGROUND_SIZE + 1][BACKGROUND_SIZE + 1]f32
 	// data, json_err := json.marshal(empty_map)
 	data, json_err := json.marshal(height_map)
 	if (json_err != nil) {

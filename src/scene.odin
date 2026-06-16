@@ -59,14 +59,22 @@ init_scene :: proc() {
 	}
 
 	// GROUND
-	create_grid(ground_vertices[:], GRID_SIZE)
+	create_grid(ground_vertices[:], GRID_SIZE, {min = {0, 0, 0}, max = {0, 0, 0}})
 	init_vertices(&ground_vbo, &ground_vao, raw_data(&ground_vertices), size_of(ground_vertices))
 
 	ground2_vbo: u32
 	// Less detailed, so fewer vertices? Do that only as a later optimization.
 	// 16 times bigger area, but 4 times bigger cell so only 4 times the amount of vertices
-	ground2_vertices: [GROUND_VERTICES_COUNT * 16]Vertex
-	create_grid(ground2_vertices[:], BACKGROUND_SIZE)
+	// ground2_vertices: [GROUND_VERTICES_COUNT * 16]Vertex
+	// ground2_vertices: [GROUND_VERTICES_COUNT]Vertex
+	create_grid(
+		ground2_vertices[:],
+		BACKGROUND_SIZE,
+		{
+			min = {GRID_OFFSET, 0, GRID_OFFSET},
+			max = {GRID_OFFSET + GRID_SIZE, 0, GRID_OFFSET + GRID_SIZE},
+		},
+	)
 	init_vertices(
 		&ground2_vbo,
 		&ground2_vao,
@@ -299,9 +307,17 @@ draw_scene :: proc() {
 		use_texture_shader(view, projection)
 		gl.BindTexture(gl.TEXTURE_2D, scene_texture)
 		shader_set_mat4(texture_shader_program, "model", model)
-		shader_set_vec3(texture_shader_program, "color", {1.0, 1.0, 1.0})
+		// shader_set_vec3(texture_shader_program, "color", {1.0, 1.0, 1.0})
+		shader_set_vec3(texture_shader_program, "color", {0.5, 0.3, 0.1})
 		gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 		gl.DrawArrays(gl.TRIANGLES, 0, GROUND_VERTICES_COUNT)
+
+		// BACKGROUND
+		gl.BindVertexArray(ground2_vao)
+		model = 1
+		model *= glsl.mat4Translate(GROUND_POSITION + {-GRID_OFFSET, 0, -GRID_OFFSET})
+		shader_set_mat4(texture_shader_program, "model", model)
+		gl.DrawArrays(gl.TRIANGLES, 0, GROUND_VERTICES_COUNT * 16)
 	} else {
 		// BACKGROUND FOR THE WIREFRAME
 		use_color_shader(view, projection)
@@ -331,15 +347,15 @@ draw_scene :: proc() {
 			// gl.DrawArrays(gl.LINE_STRIP_ADJACENCY, 0, GRID_SIZE * GRID_SIZE * 12)
 			gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 		}
-	}
 
-	// BACKGROUND
-	gl.BindVertexArray(ground2_vao)
-	model = 1
-	// BACKGROUND_POS: [3]f32 : {0, 0, 0}
-	model *= glsl.mat4Translate(GROUND_POSITION + {-3 * GRID_SIZE / 2, 0, -3 * GRID_SIZE / 2})
-	shader_set_mat4(texture_shader_program, "model", model)
-	gl.DrawArrays(gl.TRIANGLES, 0, GROUND_VERTICES_COUNT * 16)
+		// BACKGROUND
+		gl.BindVertexArray(ground2_vao)
+		model = 1
+		model *= glsl.mat4Translate(GROUND_POSITION + {-3 * GRID_SIZE / 2, 0, -3 * GRID_SIZE / 2})
+		shader_set_mat4(color_shader_program, "model", model)
+		shader_set_vec3(color_shader_program, "color", {1.0, 0.75, 0.5})
+		gl.DrawArrays(gl.TRIANGLES, 0, GROUND_VERTICES_COUNT * 16)
+	}
 
 	// WALL
 	use_color_shader(view, projection)

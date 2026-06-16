@@ -182,7 +182,7 @@ update_cell_y :: proc(grid_i: int) {
 	}
 }
 
-create_grid :: proc(vertices: []Vertex, grid_size: int) {
+create_grid :: proc(vertices: []Vertex, grid_size: int, stencil: BoundingBox) {
 	uv_low: f32 = 0.0
 	uv_high: f32 = 1.0
 	// uv_high: f32 = 0.0
@@ -220,48 +220,60 @@ create_grid :: proc(vertices: []Vertex, grid_size: int) {
 		bottom_right.pos.x = 1
 		center.pos.x = 0.5
 		for j := 0; j < grid_size; j += 1 {
-			top_left.pos.y = height_map[i][j]
-			top_right.pos.y = height_map[i][j + 1]
-			bottom_left.pos.y = height_map[i + 1][j]
-			bottom_right.pos.y = height_map[i + 1][j + 1]
-			center.pos.y = get_center_y(
-				top_left.pos.y,
-				top_right.pos.y,
-				bottom_left.pos.y,
-				bottom_right.pos.y,
-			)
+			// if (i > int(stencil.min.z) &&
+			// 	   i < int(stencil.max.z) &&
+			// 	   j > int(stencil.min.x) &&
+			// 	   j < int(stencil.max.x)) {
+			// 	continue
+			// }
+			if (i < int(stencil.min.z) ||
+				   i >= int(stencil.max.z) ||
+				   j < int(stencil.min.x) ||
+				   j >= int(stencil.max.x)) {
 
-			// TOP
-			vertices[grid_i + 0] = top_left
-			vertices[grid_i + 1] = top_right
-			vertices[grid_i + 2] = center
+				top_left.pos.y = height_map[i][j]
+				top_right.pos.y = height_map[i][j + 1]
+				bottom_left.pos.y = height_map[i + 1][j]
+				bottom_right.pos.y = height_map[i + 1][j + 1]
+				center.pos.y = get_center_y(
+					top_left.pos.y,
+					top_right.pos.y,
+					bottom_left.pos.y,
+					bottom_right.pos.y,
+				)
 
-			// RIGHT
-			vertices[grid_i + 3] = top_right
-			vertices[grid_i + 4] = bottom_right
-			vertices[grid_i + 5] = center
+				// TOP
+				vertices[grid_i + 0] = top_left
+				vertices[grid_i + 1] = top_right
+				vertices[grid_i + 2] = center
 
-			// BOTTOM
-			vertices[grid_i + 6] = bottom_right
-			vertices[grid_i + 7] = bottom_left
-			vertices[grid_i + 8] = center
+				// RIGHT
+				vertices[grid_i + 3] = top_right
+				vertices[grid_i + 4] = bottom_right
+				vertices[grid_i + 5] = center
 
-			// LEFT
-			vertices[grid_i + 9] = bottom_left
-			vertices[grid_i + 10] = top_left
-			vertices[grid_i + 11] = center
+				// BOTTOM
+				vertices[grid_i + 6] = bottom_right
+				vertices[grid_i + 7] = bottom_left
+				vertices[grid_i + 8] = center
 
-			// Calculate normals
-			for k := 0; k < 12; k += 3 {
-				ti := grid_i + k
-				v0 := vertices[ti + 0].pos
-				v1 := vertices[ti + 1].pos
-				v2 := vertices[ti + 2].pos
-				normal := -m.normalize(m.cross(v1 - v0, v2 - v0))
-				vertices[ti + 0].normal = normal
-				vertices[ti + 1].normal = normal
-				vertices[ti + 2].normal = normal
-				// fmt.println(normal)
+				// LEFT
+				vertices[grid_i + 9] = bottom_left
+				vertices[grid_i + 10] = top_left
+				vertices[grid_i + 11] = center
+
+				// Calculate normals
+				for k := 0; k < 12; k += 3 {
+					ti := grid_i + k
+					v0 := vertices[ti + 0].pos
+					v1 := vertices[ti + 1].pos
+					v2 := vertices[ti + 2].pos
+					normal := -m.normalize(m.cross(v1 - v0, v2 - v0))
+					vertices[ti + 0].normal = normal
+					vertices[ti + 1].normal = normal
+					vertices[ti + 2].normal = normal
+					// fmt.println(normal)
+				}
 			}
 
 			grid_i += 12

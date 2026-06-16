@@ -20,8 +20,8 @@ soldiers := []Creature{{pos = [3]f32{0.0, 0.0, 0.0}}}
 soldier_i := 0
 soldier := &soldiers[soldier_i]
 
-// soldier_selected := -1
-soldier_selected := soldier_i
+soldier_selected := -1
+// soldier_selected := soldier_i
 soldier_fire_at_will := false
 soldier_dead := false
 
