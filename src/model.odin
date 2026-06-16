@@ -1,6 +1,5 @@
 package game
 
-import "core:fmt"
 import m "core:math/linalg"
 
 update_cell :: proc(x, z: int) {
@@ -8,146 +7,15 @@ update_cell :: proc(x, z: int) {
 	update_cell_y(cell_i)
 }
 
-/*
-Need to update affected center points as well.
-*/
-update_grid :: proc(x, z: int) {
-	// fmt.println(height_map_point)
-
-
-	cell_i := z * VERTICES_PER_ROW + x * VERTICES_PER_CELL
-
-	// fmt.println(cell_i)
-	// fmt.println(x, z)
-
-	if z == 0 {
-		if x == 0 {
-			// TOP LEFT
-
-			update_cell_y(cell_i)
-		} else if x == HEIGHT_MAP_SIZE - 1 {
-			// TOP RIGHT
-			// fmt.println("TOP RIGHT")
-
-			cell_i -= VERTICES_PER_CELL
-
-			update_cell_y(cell_i)
-		} else {
-			// TOP EDGE			
-			// fmt.println("TOP EDGE")
-
-			// Left cell
-			update_cell_y(cell_i - VERTICES_PER_CELL)
-			// Right cell
-			update_cell_y(cell_i)
-		}
-	} else if z == HEIGHT_MAP_SIZE - 1 {
-		cell_i -= VERTICES_PER_ROW
-
-		if x == 0 {
-			// BOTTOM LEFT CELL
-			// fmt.println("BOTTOM LEFT")
-
-			update_cell_y(cell_i)
-		} else if x == HEIGHT_MAP_SIZE - 1 {
-			// BOTTOM RIGHT
-			// fmt.println("BOTTOM RIGHT")
-
-			cell_i -= VERTICES_PER_CELL
-
-			update_cell_y(cell_i)
-		} else {
-			// BOTTOM EDGE
-			// fmt.println("BOTTOM EDGE")
-
-			// Left cell
-			update_cell_y(cell_i - VERTICES_PER_CELL)
-			// Right cell
-			update_cell_y(cell_i)
-		}
-	} else if x == 0 {
-		// LEFT EDGE
-		// fmt.println("LEFT EDGE")
-
-		// Top cell
-		update_cell_y(cell_i - VERTICES_PER_ROW)
-		// Bottom cell
-		update_cell_y(cell_i)
-	} else if x == HEIGHT_MAP_SIZE - 1 {
-		// RIGHT EDGE
-		// fmt.println("RIGHT EDGE")
-
-		cell_i -= VERTICES_PER_CELL
-
-		// Top cell
-		update_cell_y(cell_i - VERTICES_PER_ROW)
-		// Bottom cell
-		update_cell_y(cell_i)
-	} else {
-		// INTERIOR
-		// fmt.println("INTERIOR")
-
-		// // Top left cell
-		// update_cell_y(cell_i - VERTICES_PER_ROW - VERTICES_PER_CELL)
-		// // Top right cell
-		// update_cell_y(cell_i - VERTICES_PER_ROW)
-		// // Bottom right cell
-		// update_cell_y(cell_i)
-		// // Bottom left cell
-		// update_cell_y(cell_i - VERTICES_PER_CELL)
-
-		// Top left cell
-		update_cell_y(cell_i - VERTICES_PER_ROW - VERTICES_PER_CELL)
-		// Top center cell
-		update_cell_y(cell_i - VERTICES_PER_ROW)
-		// Top right cell
-		update_cell_y(cell_i - VERTICES_PER_ROW + VERTICES_PER_CELL)
-
-		// Bottom right cell
-		update_cell_y(cell_i)
-		// Bottom left cell
-		update_cell_y(cell_i - VERTICES_PER_CELL)
-	}
-
-
-	/*
-	Each height point is shared by 2 - 8 triangles. On top of that, they affect the center point 
-	which is shared by 4 triangles. Triangles are not sharing vertices.
-	
-	Simpler way to think about this is this
-	map corner point:	2 vertices | 1 center  = 4 vertices		| The center y value is based on the adjacent height points
-	map edge point:		4 vertices | 2 centers = 8 vertices
-	map interior poin:	8 vertices | 4 centers = 16 vertices
-
-
-	Calculate the affected center point heights before updating the vertices.
-
-	Always update the same size chunk of the vertices, regardless of how many of them are changed.
-
-	Share code from the grid creation. Should be easy.
-
-	*/
-}
-
-// Cell :: struct {
-// 	top_left: [3]f32,
-
-// }
-
-// update_cell_top_left :: proc(grid_i: int, top_left: [3]f32) {}
-// update_cell_y :: proc(grid_i: int, top_left, top_right, bottom_right, bottom_left, center: f32) {
 update_cell_y :: proc(grid_i: int) {
 	x := grid_i % VERTICES_PER_ROW / VERTICES_PER_CELL
 	z := grid_i / VERTICES_PER_ROW
 
-	// fmt.println(x, z)
-
-	top_left := height_map[z][x]
-	top_right := height_map[z][x + 1]
-	bottom_right := height_map[z + 1][x + 1]
-	bottom_left := height_map[z + 1][x]
+	top_left := height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x]
+	top_right := height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x + 1]
+	bottom_right := height_map_edit[(z + 1) * HEIGHT_MAP_EDIT_SIZE + x + 1]
+	bottom_left := height_map_edit[(z + 1) * HEIGHT_MAP_EDIT_SIZE + x]
 	center := get_center_y(top_left, top_right, bottom_right, bottom_left)
-	// update_cell_y(grid_i, top_left, top_right, bottom_right, bottom_left, center)
 
 	ground_vertices[grid_i + 0].pos.y = top_left
 	ground_vertices[grid_i + 1].pos.y = top_right
@@ -178,11 +46,10 @@ update_cell_y :: proc(grid_i: int) {
 		ground_vertices[ti + 0].normal = normal
 		ground_vertices[ti + 1].normal = normal
 		ground_vertices[ti + 2].normal = normal
-		// fmt.println(normal)
 	}
 }
 
-create_grid :: proc(vertices: []Vertex, grid_size: int, stencil: BoundingBox) {
+create_grid :: proc(vertices: []Vertex, grid_size: int, height_map: []f32, stencil: BoundingBox) {
 	uv_low: f32 = 0.0
 	uv_high: f32 = 1.0
 	// uv_high: f32 = 0.0
@@ -231,10 +98,15 @@ create_grid :: proc(vertices: []Vertex, grid_size: int, stencil: BoundingBox) {
 				   j < int(stencil.min.x) ||
 				   j >= int(stencil.max.x)) {
 
-				top_left.pos.y = height_map[i][j]
-				top_right.pos.y = height_map[i][j + 1]
-				bottom_left.pos.y = height_map[i + 1][j]
-				bottom_right.pos.y = height_map[i + 1][j + 1]
+				// top_left.pos.y = height_map[i][j]
+				// top_right.pos.y = height_map[i][j + 1]
+				// bottom_left.pos.y = height_map[i + 1][j]
+				// bottom_right.pos.y = height_map[i + 1][j + 1]
+				stride := grid_size + 1
+				top_left.pos.y = height_map[i * stride + j]
+				top_right.pos.y = height_map[i * stride + j + 1]
+				bottom_left.pos.y = height_map[(i + 1) * stride + j]
+				bottom_right.pos.y = height_map[(i + 1) * stride + j + 1]
 				center.pos.y = get_center_y(
 					top_left.pos.y,
 					top_right.pos.y,

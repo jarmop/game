@@ -59,25 +59,27 @@ init_scene :: proc() {
 	}
 
 	// GROUND
-	create_grid(ground_vertices[:], GRID_SIZE, {min = {0, 0, 0}, max = {0, 0, 0}})
+	create_grid(
+		ground_vertices[:],
+		GRID_SIZE,
+		height_map_edit[:],
+		{min = {0, 0, 0}, max = {0, 0, 0}},
+	)
 	init_vertices(&ground_vbo, &ground_vao, raw_data(&ground_vertices), size_of(ground_vertices))
 
-	ground2_vbo: u32
-	// Less detailed, so fewer vertices? Do that only as a later optimization.
-	// 16 times bigger area, but 4 times bigger cell so only 4 times the amount of vertices
-	// ground2_vertices: [GROUND_VERTICES_COUNT * 16]Vertex
-	// ground2_vertices: [GROUND_VERTICES_COUNT]Vertex
+	ground_bg_vbo: u32
 	create_grid(
 		ground2_vertices[:],
 		BACKGROUND_SIZE,
+		height_map_bg[:],
 		{
 			min = {GRID_OFFSET, 0, GRID_OFFSET},
 			max = {GRID_OFFSET + GRID_SIZE, 0, GRID_OFFSET + GRID_SIZE},
 		},
 	)
 	init_vertices(
-		&ground2_vbo,
-		&ground2_vao,
+		&ground_bg_vbo,
+		&ground_bg_vao,
 		raw_data(&ground2_vertices),
 		size_of(ground2_vertices),
 	)
@@ -89,21 +91,21 @@ init_scene :: proc() {
 		for x in 0 ..< GRID_SIZE {
 			// lines along the X axis
 			ground_vertices_grid[v_i] = {
-				pos = {f32(x), height_map[z][x], f32(z)},
+				pos = {f32(x), height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x], f32(z)},
 			}
 			v_i += 1
 			ground_vertices_grid[v_i] = {
-				pos = {f32(x + 1), height_map[z][x + 1], f32(z)},
+				pos = {f32(x + 1), height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x + 1], f32(z)},
 			}
 			v_i += 1
 
 			// lines along the Z axis
 			ground_vertices_grid[v_i] = {
-				pos = {f32(x), height_map[z][x], f32(z)},
+				pos = {f32(x), height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x], f32(z)},
 			}
 			v_i += 1
 			ground_vertices_grid[v_i] = {
-				pos = {f32(x), height_map[z + 1][x], f32(z + 1)},
+				pos = {f32(x), height_map_edit[(z + 1) * HEIGHT_MAP_EDIT_SIZE + x], f32(z + 1)},
 			}
 			v_i += 1
 		}
@@ -179,10 +181,10 @@ init_scene :: proc() {
 	init_vertices(&path_vbo, &path_vao, raw_data(path_vertices), size_of(path_vertices))
 
 	// HEIGHT MAP
-	gl.GenVertexArrays(1, &height_map_vao)
-	gl.BindVertexArray(height_map_vao)
-	gl.GenBuffers(1, &height_map_vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, height_map_vbo)
+	gl.GenVertexArrays(1, &height_map_pos_vao)
+	gl.BindVertexArray(height_map_pos_vao)
+	gl.GenBuffers(1, &height_map_pos_vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, height_map_pos_vbo)
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, size_of(LineVertex), 0)
 	gl.EnableVertexAttribArray(0)
 	height_map_vertices: []LineVertex = {
@@ -313,7 +315,7 @@ draw_scene :: proc() {
 		gl.DrawArrays(gl.TRIANGLES, 0, GROUND_VERTICES_COUNT)
 
 		// BACKGROUND
-		gl.BindVertexArray(ground2_vao)
+		gl.BindVertexArray(ground_bg_vao)
 		model = 1
 		model *= glsl.mat4Translate(GROUND_POSITION + {-GRID_OFFSET, 0, -GRID_OFFSET})
 		shader_set_mat4(texture_shader_program, "model", model)
@@ -349,7 +351,7 @@ draw_scene :: proc() {
 		}
 
 		// BACKGROUND
-		gl.BindVertexArray(ground2_vao)
+		gl.BindVertexArray(ground_bg_vao)
 		model = 1
 		model *= glsl.mat4Translate(GROUND_POSITION + {-3 * GRID_SIZE / 2, 0, -3 * GRID_SIZE / 2})
 		shader_set_mat4(color_shader_program, "model", model)
@@ -437,7 +439,7 @@ draw_scene :: proc() {
 	model *= glsl.mat4Translate(height_map_pos) //
 	shader_set_mat4(line_shader_program, "model", model)
 	shader_set_vec3(line_shader_program, "color", {1.0, 0.0, 0.0})
-	gl.BindVertexArray(height_map_vao)
+	gl.BindVertexArray(height_map_pos_vao)
 	gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 	gl.LineWidth(3.0)
 	gl.DrawArrays(gl.LINES, 0, 4)

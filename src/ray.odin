@@ -225,7 +225,7 @@ create_ground_bb :: proc(x: int, z: int, bb_size: int) -> BoundingBox {
 	max_y := -math.INF_F32
 	for i := z; i < z + bb_size + 1; i += 1 {
 		for j := x; j < x + bb_size + 1; j += 1 {
-			y := height_map[i][j]
+			y := height_map_edit[i * HEIGHT_MAP_EDIT_SIZE + j]
 			if y > max_y {
 				max_y = y
 			}

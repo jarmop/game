@@ -119,7 +119,7 @@ mouse_button_callback :: proc "c" (window: glfw.WindowHandle, button, action, mo
 
 			// Check hit on ground
 			if (triangle_d > 0) {
-				entry_point := camera.pos + ray_world * triangle_d
+				entry_point := camera.pos + ray_world * triangle_d - GROUND_POSITION
 				if (soldier_selected > -1) {
 					// Create path for the selected soldier
 					target := entry_point - CREATURE_CENTER_XZ
@@ -148,11 +148,14 @@ mouse_button_callback :: proc "c" (window: glfw.WindowHandle, button, action, mo
 					}
 				} else {
 					// Update height_map_pos
+
+					// Add 0.5 to round to the nearest int
 					height_map_row := int(entry_point.z + 0.5)
 					height_map_col := int(entry_point.x + 0.5)
 
 					height_map_pos.x = f32(height_map_col)
-					height_map_pos.y = height_map[height_map_row][height_map_col]
+					height_map_pos.y =
+						height_map_edit[height_map_row * HEIGHT_MAP_EDIT_SIZE + height_map_col]
 					height_map_pos.z = f32(height_map_row)
 				}
 			} else {
@@ -207,13 +210,15 @@ hover :: proc(x, y: f64) {
 
 		if (triangle_d > 0) {
 			// Update height_map_pos
-			entry_point := camera.pos + ray_world * triangle_d
+			entry_point := camera.pos + ray_world * triangle_d - GROUND_POSITION
 
+			// Add 0.5 to round to the nearest int
 			height_map_row := int(entry_point.z + 0.5)
 			height_map_col := int(entry_point.x + 0.5)
 
 			height_map_pos.x = f32(height_map_col)
-			height_map_pos.y = height_map[height_map_row][height_map_col]
+			height_map_pos.y =
+				height_map_edit[height_map_row * HEIGHT_MAP_EDIT_SIZE + height_map_col]
 			height_map_pos.z = f32(height_map_row)
 		}
 	}

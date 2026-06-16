@@ -56,12 +56,21 @@ init_state :: proc() {
 	}
 	defer delete(data)
 
-	json_err := json.unmarshal(data, &height_map)
+	json_err := json.unmarshal(data, &height_map_bg)
 	if (json_err != nil) {
 		fmt.println(json_err)
 	}
 
-	height_map_pos.y = height_map[int(height_map_pos.z)][int(height_map_pos.x)]
+	for z in 0 ..< HEIGHT_MAP_EDIT_SIZE {
+		for x in 0 ..< HEIGHT_MAP_EDIT_SIZE {
+			// fmt.println(x, z, stride)
+			height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x] =
+				height_map_bg[(z + GRID_OFFSET) * HEIGHT_MAP_BG_SIZE + x + GRID_OFFSET]
+		}
+	}
+
+	// height_map_pos.y = height_map_edit[int(height_map_pos.z)][int(height_map_pos.x)]
+	height_map_pos.y = height_map_edit[height_map_pos_z * HEIGHT_MAP_EDIT_SIZE + height_map_pos_x]
 
 	data, read_err = os.read_entire_file(state_filename, context.allocator)
 	if (read_err != nil) {
@@ -81,10 +90,17 @@ init_state :: proc() {
 }
 
 save_state :: proc() {
-	// empty_map: [GRID_SIZE + 1][GRID_SIZE + 1]f32
-	// empty_map: [BACKGROUND_SIZE + 1][BACKGROUND_SIZE + 1]f32
 	// data, json_err := json.marshal(empty_map)
-	data, json_err := json.marshal(height_map)
+
+	for z in 0 ..< HEIGHT_MAP_EDIT_SIZE {
+		for x in 0 ..< HEIGHT_MAP_EDIT_SIZE {
+			// fmt.println(x, z, stride)
+			height_map_bg[(z + GRID_OFFSET) * HEIGHT_MAP_BG_SIZE + x + GRID_OFFSET] =
+				height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x]
+		}
+	}
+
+	data, json_err := json.marshal(height_map_bg)
 	if (json_err != nil) {
 		fmt.println(json_err)
 	}

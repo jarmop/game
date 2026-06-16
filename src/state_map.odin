@@ -54,15 +54,21 @@ GRID_OFFSET :: 3 * GRID_SIZE / 2
 BORDER_SIZE :: GRID_SIZE / 4
 BACKGROUND_SIZE :: 4 * GRID_SIZE
 
-// height map could be much bigger
-HEIGHT_MAP_SIZE :: BACKGROUND_SIZE + 1
-height_map: [HEIGHT_MAP_SIZE][HEIGHT_MAP_SIZE]f32
-empty_map: [HEIGHT_MAP_SIZE][HEIGHT_MAP_SIZE]f32
-height_map_vbo: u32
-height_map_vao: u32
-hx := GRID_SIZE / 2
-hz := GRID_SIZE / 2
-height_map_pos: [3]f32 = {f32(hx), height_map[hz][hx], f32(hz)}
+HEIGHT_MAP_BG_SIZE :: BACKGROUND_SIZE + 1
+HEIGHT_MAP_EDIT_SIZE :: GRID_SIZE + 1
+height_map_bg: [HEIGHT_MAP_BG_SIZE * HEIGHT_MAP_BG_SIZE]f32
+height_map_edit: [HEIGHT_MAP_EDIT_SIZE * HEIGHT_MAP_EDIT_SIZE]f32
+empty_map: [HEIGHT_MAP_BG_SIZE * HEIGHT_MAP_BG_SIZE]f32
+
+height_map_pos_vbo: u32
+height_map_pos_vao: u32
+height_map_pos_x := GRID_SIZE / 2
+height_map_pos_z := GRID_SIZE / 2
+height_map_pos: [3]f32 = {
+	f32(height_map_pos_x),
+	height_map_edit[height_map_pos_z * HEIGHT_MAP_EDIT_SIZE + height_map_pos_x],
+	f32(height_map_pos_z),
+}
 
 CELL_SIZE :: 1.0
 GROUND_SIZE :: GRID_SIZE * CELL_SIZE
@@ -97,7 +103,7 @@ ground2_vertices: [GROUND_VERTICES_COUNT * 16]Vertex
 // ground_vertices_cell: [GROUND_VERTICES_COUNT / VERTICES_PER_TRIANGLE]Vertex
 ground_vertices_grid: [GRID_SIZE * 2 * GRID_SIZE * 2]Vertex
 
-ground2_vao: u32
+ground_bg_vao: u32
 
 // -------------- WALL --------------
 WALL_X_DIMENSIONS :: [3]f32{1.2, 2.0, 0.2}
