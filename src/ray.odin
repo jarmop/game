@@ -42,21 +42,19 @@ hit_distance :: proc(bb: BoundingBox, ray_start: [3]f32, ray_direction: [3]f32) 
 // Find the cell or some other smaller set of triangles before searching to triangles
 get_ground_triangle_hit_distance :: proc(ray_origin: [3]f32, ray_dir: [3]f32) -> f32 {
 	// fmt.println("-----------")
-	return get_triangle_d_recursive(GRID_OFFSET, GRID_OFFSET, GRID_SIZE, ray_origin, ray_dir)
+	return get_triangle_d_recursive(0, 0, GRID_SIZE, ray_origin, ray_dir)
 }
 
 get_triangle_d_recursive :: proc(
-	x0: int,
-	z0: int,
+	x0: int, // relative to the edit area
+	z0: int, // relative to the edit area
 	grid_size: int,
 	ray_origin: [3]f32,
 	ray_dir: [3]f32,
 ) -> f32 {
 	min_d: f32 = 0
 	if grid_size == 1 {
-		cell_i :=
-			(z0 - GRID_OFFSET) * GRID_SIZE * VERTICES_PER_CELL +
-			(x0 - GRID_OFFSET) * VERTICES_PER_CELL
+		cell_i := z0 * GRID_SIZE * VERTICES_PER_CELL + x0 * VERTICES_PER_CELL
 		// fmt.println(cell_i)
 		return get_triangle_d(
 			ray_origin,
@@ -89,9 +87,9 @@ get_triangle_d :: proc(ray_origin: [3]f32, ray_dir: [3]f32, ground_vertices: []V
 	min_t: f32 = math.INF_F32
 	for ti := 0; ti < len(ground_vertices) / 3; ti += 1 {
 		i := ti * 3
-		v0 := ground_vertices[i + 0].pos + {f32(GRID_OFFSET), 0, f32(GRID_OFFSET)}
-		v1 := ground_vertices[i + 1].pos + {f32(GRID_OFFSET), 0, f32(GRID_OFFSET)}
-		v2 := ground_vertices[i + 2].pos + {f32(GRID_OFFSET), 0, f32(GRID_OFFSET)}
+		v0 := ground_vertices[i + 0].pos
+		v1 := ground_vertices[i + 1].pos
+		v2 := ground_vertices[i + 2].pos
 
 		t: f32 = 0
 		if ray_triangle_intersect(ray_origin, ray_dir, v0, v1, v2, &t) {
@@ -257,7 +255,7 @@ get_bb_from_cache :: proc(x: int, z: int, bb_size: int) -> BoundingBox {
 		return cached_bb
 	}
 
-	bb := create_ground_bb(x, z, bb_size)
+	bb := create_ground_bb(x + GRID_OFFSET, z + GRID_OFFSET, bb_size)
 
 	ground_bb_cache[bb_cache_i] = bb
 

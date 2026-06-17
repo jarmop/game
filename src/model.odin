@@ -8,6 +8,7 @@ update_cell :: proc(x, z: int) {
 }
 
 update_cell_y :: proc(grid_i: int) {
+	// grid_i refers to the vertex grid
 	x := grid_i % VERTICES_PER_ROW / VERTICES_PER_CELL
 	z := grid_i / VERTICES_PER_ROW
 
