@@ -316,8 +316,8 @@ draw_scene :: proc() {
 
 		// BACKGROUND
 		gl.BindVertexArray(ground_bg_vao)
-		model = 1
-		model *= glsl.mat4Translate(GROUND_BG_POSITION)
+		// model = 1
+		// model *= glsl.mat4Translate(GROUND_BG_POSITION)
 		shader_set_mat4(texture_shader_program, "model", model)
 		gl.DrawArrays(gl.TRIANGLES, 0, GROUND_VERTICES_COUNT * 16)
 	} else {
@@ -352,8 +352,8 @@ draw_scene :: proc() {
 
 		// BACKGROUND
 		gl.BindVertexArray(ground_bg_vao)
-		model = 1
-		model *= glsl.mat4Translate(GROUND_BG_POSITION)
+		// model = 1
+		// model *= glsl.mat4Translate(GROUND_BG_POSITION)
 		shader_set_mat4(color_shader_program, "model", model)
 		shader_set_vec3(color_shader_program, "color", {1.0, 0.75, 0.5})
 		gl.DrawArrays(gl.TRIANGLES, 0, GROUND_VERTICES_COUNT * 16)
