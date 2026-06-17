@@ -61,8 +61,9 @@ init_scene :: proc() {
 	// GROUND
 	create_grid(
 		ground_vertices[:],
+		GRID_OFFSET,
 		GRID_SIZE,
-		height_map_edit[:],
+		height_map_bg[:],
 		{min = {0, 0, 0}, max = {0, 0, 0}},
 	)
 	init_vertices(&ground_vbo, &ground_vao, raw_data(&ground_vertices), size_of(ground_vertices))
@@ -70,6 +71,7 @@ init_scene :: proc() {
 	ground_bg_vbo: u32
 	create_grid(
 		ground2_vertices[:],
+		0,
 		BACKGROUND_SIZE,
 		height_map_bg[:],
 		{

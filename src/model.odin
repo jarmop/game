@@ -50,43 +50,49 @@ update_cell_y :: proc(grid_i: int) {
 	}
 }
 
-create_grid :: proc(vertices: []Vertex, grid_size: int, height_map: []f32, stencil: BoundingBox) {
+create_grid :: proc(
+	vertices: []Vertex,
+	grid_offset: int,
+	grid_size: int,
+	height_map: []f32,
+	stencil: BoundingBox,
+) {
 	uv_low: f32 = 0.0
 	uv_high: f32 = 1.0
 	// uv_high: f32 = 0.0
 	normal := [3]f32{0.0, 1.0, 0.0}
 	top_left: Vertex = {
-		pos     = {0.0, 0.0, 0.0},
+		pos     = {f32(grid_offset), 0.0, f32(grid_offset)},
 		normal  = normal,
 		texture = {uv_low, uv_high},
 	}
 	top_right: Vertex = {
-		pos     = {1.0, 0.0, 0.0},
+		pos     = {f32(grid_offset + 1), 0.0, f32(grid_offset)},
 		normal  = normal,
 		texture = {uv_high, uv_high},
 	}
 	bottom_right: Vertex = {
-		pos     = {1.0, 0.0, 1.0},
+		pos     = {f32(grid_offset + 1), 0.0, f32(grid_offset + 1)},
 		normal  = normal,
 		texture = {uv_high, uv_low},
 	}
 	bottom_left: Vertex = {
-		pos     = {0.0, 0.0, 1.0},
+		pos     = {f32(grid_offset), 0.0, f32(grid_offset + 1)},
 		normal  = normal,
 		texture = {uv_low, uv_low},
 	}
 	center: Vertex = {
-		pos     = {0.5, 0.0, 0.5},
+		pos     = {f32(grid_offset) + 0.5, 0.0, f32(grid_offset) + 0.5},
 		normal  = normal,
 		texture = {uv_high / 2, uv_high / 2},
 	}
 	grid_i := 0
-	for i := 0; i < grid_size; i += 1 {
-		top_left.pos.x = 0
-		top_right.pos.x = 1
-		bottom_left.pos.x = 0
-		bottom_right.pos.x = 1
-		center.pos.x = 0.5
+	for i := grid_offset; i < grid_offset + grid_size; i += 1 {
+		top_left.pos.x = f32(grid_offset)
+		top_right.pos.x = f32(grid_offset + 1)
+		bottom_left.pos.x = f32(grid_offset)
+		bottom_right.pos.x = f32(grid_offset + 1)
+		center.pos.x = f32(grid_offset) + 0.5
 		for j := 0; j < grid_size; j += 1 {
 			// if (i > int(stencil.min.z) &&
 			// 	   i < int(stencil.max.z) &&
