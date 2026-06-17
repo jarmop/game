@@ -1,5 +1,6 @@
 package game
 
+import "core:fmt"
 import m "core:math/linalg"
 
 update_cell :: proc(x, z: int) {
@@ -93,23 +94,13 @@ create_grid :: proc(
 		bottom_left.pos.x = f32(grid_offset)
 		bottom_right.pos.x = f32(grid_offset + 1)
 		center.pos.x = f32(grid_offset) + 0.5
-		for j := 0; j < grid_size; j += 1 {
-			// if (i > int(stencil.min.z) &&
-			// 	   i < int(stencil.max.z) &&
-			// 	   j > int(stencil.min.x) &&
-			// 	   j < int(stencil.max.x)) {
-			// 	continue
-			// }
+		for j := grid_offset; j < grid_offset + grid_size; j += 1 {
 			if (i < int(stencil.min.z) ||
 				   i >= int(stencil.max.z) ||
 				   j < int(stencil.min.x) ||
 				   j >= int(stencil.max.x)) {
 
-				// top_left.pos.y = height_map[i][j]
-				// top_right.pos.y = height_map[i][j + 1]
-				// bottom_left.pos.y = height_map[i + 1][j]
-				// bottom_right.pos.y = height_map[i + 1][j + 1]
-				stride := grid_size + 1
+				stride := HEIGHT_MAP_BG_SIZE
 				top_left.pos.y = height_map[i * stride + j]
 				top_right.pos.y = height_map[i * stride + j + 1]
 				bottom_left.pos.y = height_map[(i + 1) * stride + j]
@@ -151,18 +142,10 @@ create_grid :: proc(
 					vertices[ti + 0].normal = normal
 					vertices[ti + 1].normal = normal
 					vertices[ti + 2].normal = normal
-					// fmt.println(normal)
 				}
 			}
 
 			grid_i += 12
-
-			// for v in vertices {
-			// 	fmt.println(v.pos)aaaaass
-			// }
-			// fmt.println("****************")
-			// fmt.println(grid_i)
-			// fmt.println("****************")
 
 			top_left.pos.x += CELL_SIZE
 			top_right.pos.x += CELL_SIZE
@@ -176,12 +159,7 @@ create_grid :: proc(
 		bottom_left.pos.z += CELL_SIZE
 		bottom_right.pos.z += CELL_SIZE
 		center.pos.z += CELL_SIZE
-
-		// fmt.println(top_left.pos.z)
 	}
-
-	// stride := 3 * 4 * 5
-	// fmt.println(vertices[2])
 }
 
 get_center_y :: proc(top_left, top_right, bottom_left, bottom_right: f32) -> f32 {
