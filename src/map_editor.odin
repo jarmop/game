@@ -19,7 +19,9 @@ y_modifier :: proc(d: f32) -> f32 {
 	return (math.cos(d * math.PI) + 1) / 2
 }
 
-edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
+edit_height_radius :: proc(cx_m: int, cz_m: int, r: int, y: f32) {
+	cx := cx_m / CELL_SIZE
+	cz := cz_m / CELL_SIZE
 	cells_to_update: [2 * MAX_MAP_EDIT_RADIUS * 2 * MAX_MAP_EDIT_RADIUS][2]int
 	cells_to_update_next_i := 0
 	// fmt.println("edit_height_radius", cx, cz, r, y)
@@ -83,11 +85,12 @@ add_to_map_edit_radius :: proc(value: int) {
 
 	gl.BindVertexArray(height_map_pos_vao)
 	gl.BindBuffer(gl.ARRAY_BUFFER, height_map_pos_vbo)
+	map_edit_radius_m := f32(map_edit_radius) * CELL_SIZE
 	height_map_vertices: []LineVertex = {
-		{pos = {-f32(map_edit_radius), 0, 0}},
-		{pos = {f32(map_edit_radius), 0, 0}},
-		{pos = {0, 0, -f32(map_edit_radius)}},
-		{pos = {0, 0, f32(map_edit_radius)}},
+		{pos = {-map_edit_radius_m, 0, 0}},
+		{pos = {map_edit_radius_m, 0, 0}},
+		{pos = {0, 0, -map_edit_radius_m}},
+		{pos = {0, 0, map_edit_radius_m}},
 	}
 	gl.BufferData(
 		gl.ARRAY_BUFFER,

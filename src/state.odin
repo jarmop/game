@@ -61,11 +61,11 @@ init_state :: proc() {
 		fmt.println(json_err)
 	}
 
-	height_map_pos_x := GRID_OFFSET + GRID_SIZE / 2
-	height_map_pos_z := GRID_OFFSET + GRID_SIZE / 2
-	height_map_pos.x = f32(height_map_pos_x)
-	height_map_pos.y = height_map_bg[height_map_pos_z * HEIGHT_MAP_BG_SIZE + height_map_pos_x]
-	height_map_pos.z = f32(height_map_pos_z)
+	height_map_col := GRID_OFFSET + GRID_SIZE / 2
+	height_map_row := GRID_OFFSET + GRID_SIZE / 2
+	height_map_pos.x = f32(height_map_col) * CELL_SIZE
+	height_map_pos.y = height_map_bg[height_map_row * HEIGHT_MAP_BG_SIZE + height_map_col]
+	height_map_pos.z = f32(height_map_row) * CELL_SIZE
 
 	data, read_err = os.read_entire_file(state_filename, context.allocator)
 	if (read_err != nil) {

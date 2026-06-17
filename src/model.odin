@@ -55,38 +55,39 @@ create_grid :: proc(
 	uv_high: f32 = 1.0
 	// uv_high: f32 = 0.0
 	normal := [3]f32{0.0, 1.0, 0.0}
+	grid_offset_m := f32(grid_offset * CELL_SIZE)
 	top_left: Vertex = {
-		pos     = {f32(grid_offset), 0.0, f32(grid_offset)},
+		pos     = {grid_offset_m, 0.0, grid_offset_m},
 		normal  = normal,
 		texture = {uv_low, uv_high},
 	}
 	top_right: Vertex = {
-		pos     = {f32(grid_offset + 1), 0.0, f32(grid_offset)},
+		pos     = {grid_offset_m + CELL_SIZE, 0.0, grid_offset_m},
 		normal  = normal,
 		texture = {uv_high, uv_high},
 	}
 	bottom_right: Vertex = {
-		pos     = {f32(grid_offset + 1), 0.0, f32(grid_offset + 1)},
+		pos     = {grid_offset_m + CELL_SIZE, 0.0, grid_offset_m + CELL_SIZE},
 		normal  = normal,
 		texture = {uv_high, uv_low},
 	}
 	bottom_left: Vertex = {
-		pos     = {f32(grid_offset), 0.0, f32(grid_offset + 1)},
+		pos     = {grid_offset_m, 0.0, grid_offset_m + CELL_SIZE},
 		normal  = normal,
 		texture = {uv_low, uv_low},
 	}
 	center: Vertex = {
-		pos     = {f32(grid_offset) + 0.5, 0.0, f32(grid_offset) + 0.5},
+		pos     = {grid_offset_m + CELL_SIZE / 2, 0.0, grid_offset_m + CELL_SIZE / 2},
 		normal  = normal,
 		texture = {uv_high / 2, uv_high / 2},
 	}
 	grid_i := 0
 	for i := grid_offset; i < grid_offset + grid_size; i += 1 {
-		top_left.pos.x = f32(grid_offset)
-		top_right.pos.x = f32(grid_offset + 1)
-		bottom_left.pos.x = f32(grid_offset)
-		bottom_right.pos.x = f32(grid_offset + 1)
-		center.pos.x = f32(grid_offset) + 0.5
+		top_left.pos.x = grid_offset_m
+		top_right.pos.x = grid_offset_m + CELL_SIZE
+		bottom_left.pos.x = grid_offset_m
+		bottom_right.pos.x = grid_offset_m + CELL_SIZE
+		center.pos.x = grid_offset_m + CELL_SIZE / 2
 		for j := grid_offset; j < grid_offset + grid_size; j += 1 {
 			if (i < int(stencil.min.z) ||
 				   i >= int(stencil.max.z) ||

@@ -239,10 +239,16 @@ create_ground_bb :: proc(x: int, z: int, bb_size: int) -> BoundingBox {
 		}
 	}
 
+	x_m := f32(x * CELL_SIZE)
+	z_m := f32(z * CELL_SIZE)
 	bb: BoundingBox = {
-		min = {f32(x), min_y, f32(z)},
+		min = {x_m, min_y, z_m},
 		// 0.001 seems to be a big enough height to get recognized by raycasting
-		max = {f32(x + bb_size), max(max_y, min_y + 0.001), f32(z + bb_size)},
+		max = {
+			x_m + f32(bb_size) * CELL_SIZE,
+			max(max_y, min_y + 0.001),
+			z_m + f32(bb_size) * CELL_SIZE,
+		},
 	}
 
 	return bb

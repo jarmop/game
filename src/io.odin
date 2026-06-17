@@ -151,13 +151,13 @@ mouse_button_callback :: proc "c" (window: glfw.WindowHandle, button, action, mo
 					// Update height_map_pos
 
 					// Add 0.5 to round to the nearest int
-					height_map_row := int(entry_point.z + 0.5)
-					height_map_col := int(entry_point.x + 0.5)
+					height_map_row := int(entry_point.z / CELL_SIZE + 0.5)
+					height_map_col := int(entry_point.x / CELL_SIZE + 0.5)
 
-					height_map_pos.x = f32(height_map_col)
+					height_map_pos.x = f32(height_map_col) * CELL_SIZE
 					height_map_pos.y =
 						height_map_bg[height_map_row * HEIGHT_MAP_BG_SIZE + height_map_col]
-					height_map_pos.z = f32(height_map_row)
+					height_map_pos.z = f32(height_map_row) * CELL_SIZE
 				}
 			} else {
 				// Clicking outside the map unselects the soldier
@@ -215,14 +215,12 @@ hover :: proc(x, y: f64) {
 			entry_point := camera.pos + ray_world * triangle_d
 
 			// Add 0.5 to round to the nearest int
-			height_map_row := int(entry_point.z + 0.5)
-			height_map_col := int(entry_point.x + 0.5)
+			height_map_row := int(entry_point.z / CELL_SIZE + 0.5)
+			height_map_col := int(entry_point.x / CELL_SIZE + 0.5)
 
-			height_map_pos.x = f32(height_map_col)
-			// height_map_pos.y =
-			// 	height_map_edit[height_map_row * HEIGHT_MAP_EDIT_SIZE + height_map_col]
+			height_map_pos.x = f32(height_map_col) * CELL_SIZE
 			height_map_pos.y = height_map_bg[height_map_row * HEIGHT_MAP_BG_SIZE + height_map_col]
-			height_map_pos.z = f32(height_map_row)
+			height_map_pos.z = f32(height_map_row) * CELL_SIZE
 		}
 	}
 }

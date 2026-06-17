@@ -50,6 +50,7 @@ package game
 // // used for pathfinding, and bb cache
 
 GRID_SIZE :: 4
+// GRID_OFFSET :: 1 * int(CELL_SIZE)
 GRID_OFFSET :: 1
 BORDER_SIZE :: GRID_SIZE / 4
 BACKGROUND_SIZE :: 4 * GRID_SIZE
@@ -60,7 +61,7 @@ height_map_bg: [HEIGHT_MAP_BG_SIZE * HEIGHT_MAP_BG_SIZE]f32
 // height_map_edit: [HEIGHT_MAP_EDIT_SIZE * HEIGHT_MAP_EDIT_SIZE]f32
 empty_map: [HEIGHT_MAP_BG_SIZE * HEIGHT_MAP_BG_SIZE]f32
 
-CELL_SIZE :: 1.0
+CELL_SIZE :: 4.0
 GROUND_SIZE :: GRID_SIZE * CELL_SIZE
 // GROUND_BG_POSITION :: [3]f32{0.0, -0.01, 0.0}
 // GROUND_POSITION := [3]f32 {

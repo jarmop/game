@@ -189,11 +189,12 @@ init_scene :: proc() {
 	gl.BindBuffer(gl.ARRAY_BUFFER, height_map_pos_vbo)
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, size_of(LineVertex), 0)
 	gl.EnableVertexAttribArray(0)
+	map_edit_radius_m := f32(map_edit_radius) * CELL_SIZE
 	height_map_vertices: []LineVertex = {
-		{pos = {-f32(map_edit_radius), 0, 0}},
-		{pos = {f32(map_edit_radius), 0, 0}},
-		{pos = {0, 0, -f32(map_edit_radius)}},
-		{pos = {0, 0, f32(map_edit_radius)}},
+		{pos = {-map_edit_radius_m, 0, 0}},
+		{pos = {map_edit_radius_m, 0, 0}},
+		{pos = {0, 0, -map_edit_radius_m}},
+		{pos = {0, 0, map_edit_radius_m}},
 	}
 	gl.BufferData(
 		gl.ARRAY_BUFFER,
