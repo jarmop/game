@@ -50,7 +50,7 @@ package game
 // // used for pathfinding, and bb cache
 
 GRID_SIZE :: 4
-GRID_OFFSET: int = int(CELL_SIZE)
+GRID_OFFSET :: 1
 BORDER_SIZE :: GRID_SIZE / 4
 BACKGROUND_SIZE :: 4 * GRID_SIZE
 
