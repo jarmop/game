@@ -21,8 +21,8 @@ y_modifier :: proc(d: f32) -> f32 {
 edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
 	cells_to_update: [2 * MAX_MAP_EDIT_RADIUS * 2 * MAX_MAP_EDIT_RADIUS][2]int
 	cells_to_update_next_i := 0
-	for z in max(cz - r, 0) ..< min(cz + r, HEIGHT_MAP_EDIT_SIZE) {
-		for x in max(cx - r, 0) ..< min(cx + r, HEIGHT_MAP_EDIT_SIZE) {
+	for z in max(cz - r, GRID_OFFSET) ..< min(cz + r, GRID_OFFSET + GRID_SIZE) {
+		for x in max(cx - r, GRID_OFFSET) ..< min(cx + r, GRID_OFFSET + GRID_SIZE) {
 			if x < GRID_SIZE && z < GRID_SIZE {
 				cells_to_update[cells_to_update_next_i] = {x, z}
 				cells_to_update_next_i += 1
@@ -33,7 +33,7 @@ edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
 			if d > f32(r) {
 				continue
 			}
-			height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x] += y * y_modifier(d / f32(r))
+			height_map_bg[z * HEIGHT_MAP_BG_SIZE + x] += y * y_modifier(d / f32(r))
 		}
 	}
 	for i := 0; i < cells_to_update_next_i; i += 1 {

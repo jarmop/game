@@ -61,16 +61,20 @@ init_state :: proc() {
 		fmt.println(json_err)
 	}
 
-	for z in 0 ..< HEIGHT_MAP_EDIT_SIZE {
-		for x in 0 ..< HEIGHT_MAP_EDIT_SIZE {
-			// fmt.println(x, z, stride)
-			height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x] =
-				height_map_bg[(z + GRID_OFFSET) * HEIGHT_MAP_BG_SIZE + x + GRID_OFFSET]
-		}
-	}
+	// for z in 0 ..< HEIGHT_MAP_EDIT_SIZE {
+	// 	for x in 0 ..< HEIGHT_MAP_EDIT_SIZE {
+	// 		// fmt.println(x, z, stride)
+	// 		height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x] =
+	// 			height_map_bg[(z + GRID_OFFSET) * HEIGHT_MAP_BG_SIZE + x + GRID_OFFSET]
+	// 	}
+	// }
 
-	// height_map_pos.y = height_map_edit[int(height_map_pos.z)][int(height_map_pos.x)]
-	height_map_pos.y = height_map_edit[height_map_pos_z * HEIGHT_MAP_EDIT_SIZE + height_map_pos_x]
+	// height_map_pos.y = height_map_edit[height_map_pos_z * HEIGHT_MAP_EDIT_SIZE + height_map_pos_x]
+	height_map_pos_x := GRID_OFFSET + GRID_SIZE / 2
+	height_map_pos_z := GRID_OFFSET + GRID_SIZE / 2
+	height_map_pos.x = f32(height_map_pos_x)
+	height_map_pos.y = height_map_bg[height_map_pos_z * HEIGHT_MAP_BG_SIZE + height_map_pos_x]
+	height_map_pos.z = f32(height_map_pos_z)
 
 	data, read_err = os.read_entire_file(state_filename, context.allocator)
 	if (read_err != nil) {
@@ -92,13 +96,13 @@ init_state :: proc() {
 save_state :: proc() {
 	// data, json_err := json.marshal(empty_map)
 
-	for z in 0 ..< HEIGHT_MAP_EDIT_SIZE {
-		for x in 0 ..< HEIGHT_MAP_EDIT_SIZE {
-			// fmt.println(x, z, stride)
-			height_map_bg[(z + GRID_OFFSET) * HEIGHT_MAP_BG_SIZE + x + GRID_OFFSET] =
-				height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x]
-		}
-	}
+	// for z in 0 ..< HEIGHT_MAP_EDIT_SIZE {
+	// 	for x in 0 ..< HEIGHT_MAP_EDIT_SIZE {
+	// 		// fmt.println(x, z, stride)
+	// 		height_map_bg[(z + GRID_OFFSET) * HEIGHT_MAP_BG_SIZE + x + GRID_OFFSET] =
+	// 			height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x]
+	// 	}
+	// }
 
 	data, json_err := json.marshal(height_map_bg)
 	if (json_err != nil) {

@@ -3,19 +3,19 @@ package game
 import m "core:math/linalg"
 
 update_cell :: proc(x, z: int) {
-	cell_i := z * VERTICES_PER_ROW + x * VERTICES_PER_CELL
-	update_cell_y(cell_i)
-}
+	grid_i := z * VERTICES_PER_ROW + x * VERTICES_PER_CELL
+	// 	update_cell_y(cell_i)
+	// }
 
-update_cell_y :: proc(grid_i: int) {
+	// update_cell_y :: proc(grid_i: int) {
 	// grid_i refers to the vertex grid
-	x := grid_i % VERTICES_PER_ROW / VERTICES_PER_CELL
-	z := grid_i / VERTICES_PER_ROW
+	// x := grid_i % VERTICES_PER_ROW / VERTICES_PER_CELL
+	// z := grid_i / VERTICES_PER_ROW
 
-	top_left := height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x]
-	top_right := height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x + 1]
-	bottom_right := height_map_edit[(z + 1) * HEIGHT_MAP_EDIT_SIZE + x + 1]
-	bottom_left := height_map_edit[(z + 1) * HEIGHT_MAP_EDIT_SIZE + x]
+	top_left := height_map_bg[z * HEIGHT_MAP_BG_SIZE + x]
+	top_right := height_map_bg[z * HEIGHT_MAP_BG_SIZE + x + 1]
+	bottom_right := height_map_bg[(z + 1) * HEIGHT_MAP_BG_SIZE + x + 1]
+	bottom_left := height_map_bg[(z + 1) * HEIGHT_MAP_BG_SIZE + x]
 	center := get_center_y(top_left, top_right, bottom_right, bottom_left)
 
 	ground_vertices[grid_i + 0].pos.y = top_left

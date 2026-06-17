@@ -55,9 +55,9 @@ BORDER_SIZE :: GRID_SIZE / 4
 BACKGROUND_SIZE :: 4 * GRID_SIZE
 
 HEIGHT_MAP_BG_SIZE :: BACKGROUND_SIZE + 1
-HEIGHT_MAP_EDIT_SIZE :: GRID_SIZE + 1
+// HEIGHT_MAP_EDIT_SIZE :: GRID_SIZE + 1
 height_map_bg: [HEIGHT_MAP_BG_SIZE * HEIGHT_MAP_BG_SIZE]f32
-height_map_edit: [HEIGHT_MAP_EDIT_SIZE * HEIGHT_MAP_EDIT_SIZE]f32
+// height_map_edit: [HEIGHT_MAP_EDIT_SIZE * HEIGHT_MAP_EDIT_SIZE]f32
 empty_map: [HEIGHT_MAP_BG_SIZE * HEIGHT_MAP_BG_SIZE]f32
 
 CELL_SIZE :: 1.0
@@ -99,13 +99,14 @@ ground_bg_vao: u32
 
 height_map_pos_vbo: u32
 height_map_pos_vao: u32
-height_map_pos_x := GRID_SIZE / 2
-height_map_pos_z := GRID_SIZE / 2
-height_map_pos: [3]f32 = {
-	f32(height_map_pos_x),
-	height_map_edit[height_map_pos_z * HEIGHT_MAP_EDIT_SIZE + height_map_pos_x],
-	f32(height_map_pos_z),
-}
+// height_map_pos_x := GRID_SIZE / 2
+// height_map_pos_z := GRID_SIZE / 2
+height_map_pos: [3]f32
+// height_map_pos: [3]f32 = {
+// 	f32(height_map_pos_x),
+// 	height_map_edit[height_map_pos_z * HEIGHT_MAP_EDIT_SIZE + height_map_pos_x],
+// 	f32(height_map_pos_z),
+// }
 
 // -------------- WALL --------------
 WALL_X_DIMENSIONS :: [3]f32{1.2, 2.0, 0.2}

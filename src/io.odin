@@ -156,7 +156,7 @@ mouse_button_callback :: proc "c" (window: glfw.WindowHandle, button, action, mo
 
 					height_map_pos.x = f32(height_map_col)
 					height_map_pos.y =
-						height_map_edit[height_map_row * HEIGHT_MAP_EDIT_SIZE + height_map_col]
+						height_map_bg[height_map_row * HEIGHT_MAP_BG_SIZE + height_map_col]
 					height_map_pos.z = f32(height_map_row)
 				}
 			} else {

@@ -89,25 +89,25 @@ init_scene :: proc() {
 	ground_vbo_grid: u32
 
 	v_i := 0
-	for z in 0 ..< GRID_SIZE {
-		for x in 0 ..< GRID_SIZE {
+	for z in GRID_OFFSET ..< GRID_OFFSET + GRID_SIZE {
+		for x in GRID_OFFSET ..< GRID_OFFSET + GRID_SIZE {
 			// lines along the X axis
 			ground_vertices_grid[v_i] = {
-				pos = {f32(x), height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x], f32(z)},
+				pos = {f32(x), height_map_bg[z * HEIGHT_MAP_BG_SIZE + x], f32(z)},
 			}
 			v_i += 1
 			ground_vertices_grid[v_i] = {
-				pos = {f32(x + 1), height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x + 1], f32(z)},
+				pos = {f32(x + 1), height_map_bg[z * HEIGHT_MAP_BG_SIZE + x + 1], f32(z)},
 			}
 			v_i += 1
 
 			// lines along the Z axis
 			ground_vertices_grid[v_i] = {
-				pos = {f32(x), height_map_edit[z * HEIGHT_MAP_EDIT_SIZE + x], f32(z)},
+				pos = {f32(x), height_map_bg[z * HEIGHT_MAP_BG_SIZE + x], f32(z)},
 			}
 			v_i += 1
 			ground_vertices_grid[v_i] = {
-				pos = {f32(x), height_map_edit[(z + 1) * HEIGHT_MAP_EDIT_SIZE + x], f32(z + 1)},
+				pos = {f32(x), height_map_bg[(z + 1) * HEIGHT_MAP_BG_SIZE + x], f32(z + 1)},
 			}
 			v_i += 1
 		}
