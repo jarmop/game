@@ -43,7 +43,7 @@ edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
 		z := cells_to_update[i][1]
 		update_cell(x, z)
 		update_pathfinding_data_xz(x, z)
-		reset_cell_bb_in_cache(x - GRID_OFFSET, z - GRID_OFFSET)
+		reset_cell_bb_in_cache(x, z)
 	}
 }
 

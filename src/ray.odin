@@ -42,19 +42,21 @@ hit_distance :: proc(bb: BoundingBox, ray_start: [3]f32, ray_direction: [3]f32) 
 // Find the cell or some other smaller set of triangles before searching to triangles
 get_ground_triangle_hit_distance :: proc(ray_origin: [3]f32, ray_dir: [3]f32) -> f32 {
 	// fmt.println("-----------")
-	return get_triangle_d_recursive(0, 0, GRID_SIZE, ray_origin, ray_dir)
+	return get_triangle_d_recursive(GRID_OFFSET, GRID_OFFSET, GRID_SIZE, ray_origin, ray_dir)
 }
 
 get_triangle_d_recursive :: proc(
-	x0: int, // relative to the edit area
-	z0: int, // relative to the edit area
+	x0: int,
+	z0: int,
 	grid_size: int,
 	ray_origin: [3]f32,
 	ray_dir: [3]f32,
 ) -> f32 {
 	min_d: f32 = 0
 	if grid_size == 1 {
-		cell_i := z0 * GRID_SIZE * VERTICES_PER_CELL + x0 * VERTICES_PER_CELL
+		cell_i :=
+			(z0 - GRID_OFFSET) * GRID_SIZE * VERTICES_PER_CELL +
+			(x0 - GRID_OFFSET) * VERTICES_PER_CELL
 		// fmt.println(cell_i)
 		return get_triangle_d(
 			ray_origin,
@@ -211,12 +213,12 @@ get_bb_cache_offset :: proc(bb_size: int) -> int {
 	return offset
 }
 
-get_bb_cache_i :: proc(x: int, z: int, bb_size: int) -> int {
+get_bb_cache_i :: proc(bb_col: int, bb_row: int, bb_size: int) -> int {
 	offset := get_bb_cache_offset(bb_size)
 
 	bb_grid_size := GRID_SIZE / bb_size
 
-	bb_cache_i := offset + z / bb_size * bb_grid_size + x / bb_size
+	bb_cache_i := offset + bb_row / bb_size * bb_grid_size + bb_col / bb_size
 
 	return bb_cache_i
 }
@@ -247,7 +249,7 @@ create_ground_bb :: proc(x: int, z: int, bb_size: int) -> BoundingBox {
 }
 
 get_bb_from_cache :: proc(x: int, z: int, bb_size: int) -> BoundingBox {
-	bb_cache_i := get_bb_cache_i(x, z, bb_size)
+	bb_cache_i := get_bb_cache_i(x - GRID_OFFSET, z - GRID_OFFSET, bb_size)
 
 	cached_bb := ground_bb_cache[bb_cache_i]
 
@@ -255,7 +257,7 @@ get_bb_from_cache :: proc(x: int, z: int, bb_size: int) -> BoundingBox {
 		return cached_bb
 	}
 
-	bb := create_ground_bb(x + GRID_OFFSET, z + GRID_OFFSET, bb_size)
+	bb := create_ground_bb(x, z, bb_size)
 
 	ground_bb_cache[bb_cache_i] = bb
 
@@ -273,12 +275,14 @@ point_inside_bb :: proc(p: [3]f32, bb: BoundingBox) -> bool {
 	)
 }
 
-reset_cell_bb_in_cache :: proc(x0, z0: int) {
+reset_cell_bb_in_cache :: proc(x, z: int) {
+	grid_col := x - GRID_OFFSET
+	grid_row := z - GRID_OFFSET
 	for grid_size := 2; grid_size <= GRID_SIZE; grid_size *= 2 {
 		bb_size := grid_size / 2
-		x := x0 - x0 % bb_size
-		z := z0 - z0 % bb_size
+		bb_col := grid_col - grid_col % bb_size
+		bb_row := grid_row - grid_row % bb_size
 
-		ground_bb_cache[get_bb_cache_i(x, z, bb_size)] = empty_bb
+		ground_bb_cache[get_bb_cache_i(bb_col, bb_row, bb_size)] = empty_bb
 	}
 }
