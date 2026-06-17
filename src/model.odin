@@ -4,14 +4,7 @@ import "core:fmt"
 import m "core:math/linalg"
 
 update_cell :: proc(x, z: int) {
-	grid_i := (z - GRID_OFFSET) * VERTICES_PER_ROW + (x - GRID_OFFSET) * VERTICES_PER_CELL
-	// 	update_cell_y(cell_i)
-	// }
-
-	// update_cell_y :: proc(grid_i: int) {
-	// grid_i refers to the vertex grid
-	// x := grid_i % VERTICES_PER_ROW / VERTICES_PER_CELL
-	// z := grid_i / VERTICES_PER_ROW
+	vi_c := (z - GRID_OFFSET) * VERTICES_PER_ROW + (x - GRID_OFFSET) * VERTICES_PER_CELL
 
 	top_left := height_map_bg[z * HEIGHT_MAP_BG_SIZE + x]
 	top_right := height_map_bg[z * HEIGHT_MAP_BG_SIZE + x + 1]
@@ -19,35 +12,35 @@ update_cell :: proc(x, z: int) {
 	bottom_left := height_map_bg[(z + 1) * HEIGHT_MAP_BG_SIZE + x]
 	center := get_center_y(top_left, top_right, bottom_right, bottom_left)
 
-	ground_vertices[grid_i + 0].pos.y = top_left
-	ground_vertices[grid_i + 1].pos.y = top_right
-	ground_vertices[grid_i + 2].pos.y = center
+	ground_vertices[vi_c + 0].pos.y = top_left
+	ground_vertices[vi_c + 1].pos.y = top_right
+	ground_vertices[vi_c + 2].pos.y = center
 
 	// RIGHT
-	ground_vertices[grid_i + 3].pos.y = top_right
-	ground_vertices[grid_i + 4].pos.y = bottom_right
-	ground_vertices[grid_i + 5].pos.y = center
+	ground_vertices[vi_c + 3].pos.y = top_right
+	ground_vertices[vi_c + 4].pos.y = bottom_right
+	ground_vertices[vi_c + 5].pos.y = center
 
 	// BOTTOM
-	ground_vertices[grid_i + 6].pos.y = bottom_right
-	ground_vertices[grid_i + 7].pos.y = bottom_left
-	ground_vertices[grid_i + 8].pos.y = center
+	ground_vertices[vi_c + 6].pos.y = bottom_right
+	ground_vertices[vi_c + 7].pos.y = bottom_left
+	ground_vertices[vi_c + 8].pos.y = center
 
 	// LEFT
-	ground_vertices[grid_i + 9].pos.y = bottom_left
-	ground_vertices[grid_i + 10].pos.y = top_left
-	ground_vertices[grid_i + 11].pos.y = center
+	ground_vertices[vi_c + 9].pos.y = bottom_left
+	ground_vertices[vi_c + 10].pos.y = top_left
+	ground_vertices[vi_c + 11].pos.y = center
 
 	// Calculate normals
 	for i := 0; i < 12; i += 3 {
-		ti := grid_i + i
-		v0 := ground_vertices[ti + 0].pos
-		v1 := ground_vertices[ti + 1].pos
-		v2 := ground_vertices[ti + 2].pos
-		normal := -m.normalize(m.cross(v1 - v0, v2 - v0))
-		ground_vertices[ti + 0].normal = normal
-		ground_vertices[ti + 1].normal = normal
-		ground_vertices[ti + 2].normal = normal
+		vi_t := vi_c + i
+		v0 := &ground_vertices[vi_t + 0]
+		v1 := &ground_vertices[vi_t + 1]
+		v2 := &ground_vertices[vi_t + 2]
+		normal := -m.normalize(m.cross(v1.pos - v0.pos, v2.pos - v0.pos))
+		v0.normal = normal
+		v1.normal = normal
+		v2.normal = normal
 	}
 }
 

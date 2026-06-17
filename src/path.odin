@@ -89,9 +89,9 @@ update_pathfinding_data_cell :: proc(cell_i: int) {
 }
 
 get_triangle :: proc(p: [3]f32) -> ^Triangle {
-	cell_x := int(math.floor(p.x)) - GRID_OFFSET
-	cell_z := int(math.floor(p.z)) - GRID_OFFSET
-	cell := cell_table[cell_z * GRID_SIZE + cell_x]
+	cell_col := int(math.floor(p.x)) - GRID_OFFSET
+	cell_row := int(math.floor(p.z)) - GRID_OFFSET
+	cell := cell_table[cell_row * GRID_SIZE + cell_col]
 	triangles := cell.triangles
 
 	cell_corners_d: [4]f32
