@@ -1,5 +1,6 @@
 package game
 
+import "core:fmt"
 import "core:math"
 import gl "vendor:OpenGL"
 
@@ -21,9 +22,10 @@ y_modifier :: proc(d: f32) -> f32 {
 edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
 	cells_to_update: [2 * MAX_MAP_EDIT_RADIUS * 2 * MAX_MAP_EDIT_RADIUS][2]int
 	cells_to_update_next_i := 0
-	for z in max(cz - r, GRID_OFFSET) ..< min(cz + r, GRID_OFFSET + GRID_SIZE) {
-		for x in max(cx - r, GRID_OFFSET) ..< min(cx + r, GRID_OFFSET + GRID_SIZE) {
-			if x < GRID_SIZE && z < GRID_SIZE {
+	// fmt.println("edit_height_radius", cx, cz, r, y)
+	for z in max(cz - r, GRID_OFFSET) ..= min(cz + r, GRID_OFFSET + GRID_SIZE + 1) {
+		for x in max(cx - r, GRID_OFFSET) ..= min(cx + r, GRID_OFFSET + GRID_SIZE + 1) {
+			if x < GRID_OFFSET + GRID_SIZE && z < GRID_OFFSET + GRID_SIZE {
 				cells_to_update[cells_to_update_next_i] = {x, z}
 				cells_to_update_next_i += 1
 			}
@@ -41,7 +43,7 @@ edit_height_radius :: proc(cx: int, cz: int, r: int, y: f32) {
 		z := cells_to_update[i][1]
 		update_cell(x, z)
 		update_pathfinding_data_xz(x, z)
-		reset_cell_bb_in_cache(x, z)
+		reset_cell_bb_in_cache(x - GRID_OFFSET, z - GRID_OFFSET)
 	}
 }
 

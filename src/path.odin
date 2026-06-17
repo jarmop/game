@@ -26,7 +26,7 @@ create_pathfinding_data :: proc() {
 }
 
 update_pathfinding_data_xz :: proc(x, z: int) {
-	update_pathfinding_data_cell(z * GRID_SIZE + x)
+	update_pathfinding_data_cell((z - GRID_OFFSET) * GRID_SIZE + (x - GRID_OFFSET))
 }
 
 update_pathfinding_data_cell :: proc(cell_i: int) {

@@ -4,7 +4,7 @@ import "core:fmt"
 import m "core:math/linalg"
 
 update_cell :: proc(x, z: int) {
-	grid_i := z * VERTICES_PER_ROW + x * VERTICES_PER_CELL
+	grid_i := (z - GRID_OFFSET) * VERTICES_PER_ROW + (x - GRID_OFFSET) * VERTICES_PER_CELL
 	// 	update_cell_y(cell_i)
 	// }
 
