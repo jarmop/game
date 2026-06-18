@@ -241,8 +241,6 @@ hover :: proc(x, y: f64) {
 				// fmt.println("GRID_OFFSET_ROW", GRID_OFFSET_ROW)
 				// fmt.println("GRID_OFFSET_COL", GRID_OFFSET_COL)
 
-				reset_bb_cache()
-
 				create_grid(
 					ground_vertices[:],
 					GRID_OFFSET_COL,
@@ -251,6 +249,9 @@ hover :: proc(x, y: f64) {
 					height_map_bg[:],
 					{min = {0, 0, 0}, max = {0, 0, 0}},
 				)
+				create_pathfinding_data()
+				reset_bb_cache()
+
 				gl.BindVertexArray(ground_vao)
 				gl.BindBuffer(gl.ARRAY_BUFFER, ground_vbo)
 				gl.BufferData(
