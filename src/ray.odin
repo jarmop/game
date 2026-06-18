@@ -42,7 +42,13 @@ hit_distance :: proc(bb: BoundingBox, ray_start: [3]f32, ray_direction: [3]f32) 
 // Find the cell or some other smaller set of triangles before searching to triangles
 get_ground_triangle_hit_distance :: proc(ray_origin: [3]f32, ray_dir: [3]f32) -> f32 {
 	// fmt.println("-----------")
-	return get_triangle_d_recursive(GRID_OFFSET, GRID_OFFSET, GRID_SIZE, ray_origin, ray_dir)
+	return get_triangle_d_recursive(
+		GRID_OFFSET_COL,
+		GRID_OFFSET_ROW,
+		GRID_SIZE,
+		ray_origin,
+		ray_dir,
+	)
 }
 
 get_triangle_d_recursive :: proc(
@@ -55,8 +61,8 @@ get_triangle_d_recursive :: proc(
 	min_d: f32 = 0
 	if grid_size == 1 {
 		cell_i :=
-			(z0 - GRID_OFFSET) * GRID_SIZE * VERTICES_PER_CELL +
-			(x0 - GRID_OFFSET) * VERTICES_PER_CELL
+			(z0 - GRID_OFFSET_ROW) * GRID_SIZE * VERTICES_PER_CELL +
+			(x0 - GRID_OFFSET_COL) * VERTICES_PER_CELL
 		// fmt.println(cell_i)
 		return get_triangle_d(
 			ray_origin,
@@ -255,7 +261,7 @@ create_ground_bb :: proc(x: int, z: int, bb_size: int) -> BoundingBox {
 }
 
 get_bb_from_cache :: proc(x: int, z: int, bb_size: int) -> BoundingBox {
-	bb_cache_i := get_bb_cache_i(x - GRID_OFFSET, z - GRID_OFFSET, bb_size)
+	bb_cache_i := get_bb_cache_i(x - GRID_OFFSET_COL, z - GRID_OFFSET_ROW, bb_size)
 
 	cached_bb := ground_bb_cache[bb_cache_i]
 
@@ -282,13 +288,25 @@ point_inside_bb :: proc(p: [3]f32, bb: BoundingBox) -> bool {
 }
 
 reset_cell_bb_in_cache :: proc(x, z: int) {
-	grid_col := x - GRID_OFFSET
-	grid_row := z - GRID_OFFSET
+	grid_col := x - GRID_OFFSET_COL
+	grid_row := z - GRID_OFFSET_ROW
 	for grid_size := 2; grid_size <= GRID_SIZE; grid_size *= 2 {
 		bb_size := grid_size / 2
 		bb_col := grid_col - grid_col % bb_size
 		bb_row := grid_row - grid_row % bb_size
 
 		ground_bb_cache[get_bb_cache_i(bb_col, bb_row, bb_size)] = empty_bb
+	}
+}
+
+reset_bb_cache :: proc() {
+	for grid_size := 2; grid_size <= GRID_SIZE; grid_size *= 2 {
+		bb_size := grid_size / 2
+		for bb_row := 0; bb_row < GRID_SIZE; bb_row += bb_size {
+			for bb_col := 0; bb_col < GRID_SIZE; bb_col += bb_size {
+				ground_bb_cache[get_bb_cache_i(bb_col, bb_row, bb_size)] = empty_bb
+
+			}
+		}
 	}
 }

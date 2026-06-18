@@ -61,7 +61,8 @@ init_scene :: proc() {
 	// GROUND
 	create_grid(
 		ground_vertices[:],
-		GRID_OFFSET,
+		GRID_OFFSET_COL,
+		GRID_OFFSET_ROW,
 		GRID_SIZE,
 		height_map_bg[:],
 		{min = {0, 0, 0}, max = {0, 0, 0}},
@@ -72,11 +73,12 @@ init_scene :: proc() {
 	create_grid(
 		ground2_vertices[:],
 		0,
+		0,
 		BACKGROUND_SIZE,
 		height_map_bg[:],
 		{
-			min = {f32(GRID_OFFSET), 0, f32(GRID_OFFSET)},
-			max = {f32(GRID_OFFSET) + GRID_SIZE, 0, f32(GRID_OFFSET) + GRID_SIZE},
+			min = {f32(GRID_OFFSET_COL), 0, f32(GRID_OFFSET_ROW)},
+			max = {f32(GRID_OFFSET_COL) + GRID_SIZE, 0, f32(GRID_OFFSET_ROW) + GRID_SIZE},
 		},
 	)
 	init_vertices(
@@ -89,8 +91,8 @@ init_scene :: proc() {
 	ground_vbo_grid: u32
 
 	v_i := 0
-	for z in GRID_OFFSET ..< GRID_OFFSET + GRID_SIZE {
-		for x in GRID_OFFSET ..< GRID_OFFSET + GRID_SIZE {
+	for z in GRID_OFFSET_ROW ..< GRID_OFFSET_ROW + GRID_SIZE {
+		for x in GRID_OFFSET_COL ..< GRID_OFFSET_COL + GRID_SIZE {
 			// lines along the X axis
 			ground_vertices_grid[v_i] = {
 				pos = {f32(x), height_map_bg[z * HEIGHT_MAP_BG_SIZE + x], f32(z)},

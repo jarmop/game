@@ -4,7 +4,7 @@ import "core:fmt"
 import m "core:math/linalg"
 
 update_cell :: proc(x, z: int) {
-	vi_c := (z - GRID_OFFSET) * VERTICES_PER_ROW + (x - GRID_OFFSET) * VERTICES_PER_CELL
+	vi_c := (z - GRID_OFFSET_ROW) * VERTICES_PER_ROW + (x - GRID_OFFSET_COL) * VERTICES_PER_CELL
 
 	top_left := height_map_bg[z * HEIGHT_MAP_BG_SIZE + x]
 	top_right := height_map_bg[z * HEIGHT_MAP_BG_SIZE + x + 1]
@@ -46,7 +46,8 @@ update_cell :: proc(x, z: int) {
 
 create_grid :: proc(
 	vertices: []Vertex,
-	grid_offset: int,
+	grid_offset_col: int,
+	grid_offset_row: int,
 	grid_size: int,
 	height_map: []f32,
 	stencil: BoundingBox,
@@ -55,40 +56,41 @@ create_grid :: proc(
 	uv_high: f32 = 1.0
 	// uv_high: f32 = 0.0
 	normal := [3]f32{0.0, 1.0, 0.0}
-	grid_offset_m := f32(grid_offset * CELL_SIZE)
+	grid_offset_col_m := f32(grid_offset_col * CELL_SIZE)
+	grid_offset_row_m := f32(grid_offset_row * CELL_SIZE)
 	top_left: Vertex = {
-		pos     = {grid_offset_m, 0.0, grid_offset_m},
+		pos     = {grid_offset_col_m, 0.0, grid_offset_row_m},
 		normal  = normal,
 		texture = {uv_low, uv_high},
 	}
 	top_right: Vertex = {
-		pos     = {grid_offset_m + CELL_SIZE, 0.0, grid_offset_m},
+		pos     = {grid_offset_col_m + CELL_SIZE, 0.0, grid_offset_row_m},
 		normal  = normal,
 		texture = {uv_high, uv_high},
 	}
 	bottom_right: Vertex = {
-		pos     = {grid_offset_m + CELL_SIZE, 0.0, grid_offset_m + CELL_SIZE},
+		pos     = {grid_offset_col_m + CELL_SIZE, 0.0, grid_offset_row_m + CELL_SIZE},
 		normal  = normal,
 		texture = {uv_high, uv_low},
 	}
 	bottom_left: Vertex = {
-		pos     = {grid_offset_m, 0.0, grid_offset_m + CELL_SIZE},
+		pos     = {grid_offset_col_m, 0.0, grid_offset_row_m + CELL_SIZE},
 		normal  = normal,
 		texture = {uv_low, uv_low},
 	}
 	center: Vertex = {
-		pos     = {grid_offset_m + CELL_SIZE / 2, 0.0, grid_offset_m + CELL_SIZE / 2},
+		pos     = {grid_offset_col_m + CELL_SIZE / 2, 0.0, grid_offset_row_m + CELL_SIZE / 2},
 		normal  = normal,
 		texture = {uv_high / 2, uv_high / 2},
 	}
 	grid_i := 0
-	for i := grid_offset; i < grid_offset + grid_size; i += 1 {
-		top_left.pos.x = grid_offset_m
-		top_right.pos.x = grid_offset_m + CELL_SIZE
-		bottom_left.pos.x = grid_offset_m
-		bottom_right.pos.x = grid_offset_m + CELL_SIZE
-		center.pos.x = grid_offset_m + CELL_SIZE / 2
-		for j := grid_offset; j < grid_offset + grid_size; j += 1 {
+	for i := grid_offset_row; i < grid_offset_row + grid_size; i += 1 {
+		top_left.pos.x = grid_offset_col_m
+		top_right.pos.x = grid_offset_col_m + CELL_SIZE
+		bottom_left.pos.x = grid_offset_col_m
+		bottom_right.pos.x = grid_offset_col_m + CELL_SIZE
+		center.pos.x = grid_offset_col_m + CELL_SIZE / 2
+		for j := grid_offset_col; j < grid_offset_col + grid_size; j += 1 {
 			if (i < int(stencil.min.z) ||
 				   i >= int(stencil.max.z) ||
 				   j < int(stencil.min.x) ||

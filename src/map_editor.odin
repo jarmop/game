@@ -25,9 +25,9 @@ edit_height_radius :: proc(cx_m: int, cz_m: int, r: int, y: f32) {
 	cells_to_update: [2 * MAX_MAP_EDIT_RADIUS * 2 * MAX_MAP_EDIT_RADIUS][2]int
 	cells_to_update_next_i := 0
 	// fmt.println("edit_height_radius", cx, cz, r, y)
-	min_z := GRID_OFFSET
+	min_z := GRID_OFFSET_ROW
 	max_z := min_z + GRID_SIZE
-	min_x := GRID_OFFSET
+	min_x := GRID_OFFSET_COL
 	max_x := min_x + GRID_SIZE
 	edit_area_min_z := max(cz - r, min_z)
 	edit_area_max_z := min(cz + r, max_z)

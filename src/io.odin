@@ -1,6 +1,7 @@
 package game
 
 import "base:runtime"
+import "core:fmt"
 import l "core:math/linalg"
 import gl "vendor:OpenGL"
 import "vendor:glfw"
@@ -221,6 +222,61 @@ hover :: proc(x, y: f64) {
 			height_map_pos.x = f32(height_map_col) * CELL_SIZE
 			height_map_pos.y = height_map_bg[height_map_row * HEIGHT_MAP_BG_SIZE + height_map_col]
 			height_map_pos.z = f32(height_map_row) * CELL_SIZE
+
+			GRID_CENTER_ROW := GRID_OFFSET_ROW + GRID_SIZE / 2
+			GRID_CENTER_COL := GRID_OFFSET_COL + GRID_SIZE / 2
+			GRID_CENTER_ROW_D := height_map_row - GRID_CENTER_ROW
+			GRID_CENTER_COL_D := height_map_col - GRID_CENTER_COL
+
+			GRID_OFFSET_ROW_INC :=
+				int(f32(GRID_CENTER_ROW_D) / f32(abs(GRID_CENTER_ROW_D))) if abs(GRID_CENTER_ROW_D) > GRID_CENTER_RADIUS else 0
+			// GRID_OFFSET_ROW += GRID_OFFSET_ROW_INC
+
+			GRID_OFFSET_COL_INC :=
+				int(f32(GRID_CENTER_COL_D) / f32(abs(GRID_CENTER_COL_D))) if abs(GRID_CENTER_COL_D) > GRID_CENTER_RADIUS else 0
+			// GRID_OFFSET_COL += GRID_OFFSET_COL_INC
+
+			// GRID_OFFSET_ROW_INC := 0
+			// if abs(GRID_CENTER_ROW_D) > GRID_CENTER_RADIUS {
+			// 	GRID_OFFSET_ROW_INC := int(f32(GRID_CENTER_ROW_D) / f32(GRID_CENTER_ROW_D))
+			// }
+
+			if abs(GRID_OFFSET_ROW_INC) > 0 || abs(GRID_OFFSET_COL_INC) > 0 {
+				fmt.println("----------- update", GRID_OFFSET_COL_INC, GRID_OFFSET_ROW_INC)
+				// GRID_OFFSET_ROW_INC :=
+				// 	int(f32(GRID_CENTER_ROW_D) / f32(GRID_CENTER_ROW_D)) if abs(GRID_CENTER_ROW_D) > GRID_CENTER_RADIUS else 0
+				GRID_OFFSET_ROW += GRID_OFFSET_ROW_INC
+
+				// GRID_OFFSET_COL_INC :=
+				// 	int(f32(GRID_CENTER_COL_D) / f32(GRID_CENTER_COL_D)) if abs(GRID_CENTER_COL_D) > GRID_CENTER_RADIUS else 0
+				GRID_OFFSET_COL += GRID_OFFSET_COL_INC
+
+				// fmt.println("PRKL_ROW", f32(GRID_CENTER_ROW_D) / f32(GRID_CENTER_ROW_D))
+				// fmt.println("PRKL_COL", f32(GRID_CENTER_COL_D) / f32(GRID_CENTER_COL_D))
+				fmt.println("GRID_OFFSET_ROW", GRID_OFFSET_ROW)
+				fmt.println("GRID_OFFSET_COL", GRID_OFFSET_COL)
+
+				reset_bb_cache()
+
+				create_grid(
+					ground_vertices[:],
+					GRID_OFFSET_COL,
+					GRID_OFFSET_ROW,
+					GRID_SIZE,
+					height_map_bg[:],
+					{min = {0, 0, 0}, max = {0, 0, 0}},
+				)
+				gl.BindVertexArray(ground_vao)
+				gl.BindBuffer(gl.ARRAY_BUFFER, ground_vbo)
+				gl.BufferData(
+					gl.ARRAY_BUFFER,
+					size_of(ground_vertices),
+					raw_data(&ground_vertices),
+					gl.STATIC_DRAW,
+				)
+			} else {
+				fmt.println("wtf", GRID_OFFSET_COL_INC, GRID_OFFSET_ROW_INC)
+			}
 		}
 	}
 }

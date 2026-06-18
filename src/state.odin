@@ -61,8 +61,8 @@ init_state :: proc() {
 		fmt.println(json_err)
 	}
 
-	height_map_col := GRID_OFFSET + GRID_SIZE / 2
-	height_map_row := GRID_OFFSET + GRID_SIZE / 2
+	height_map_col := GRID_OFFSET_COL + GRID_SIZE / 2
+	height_map_row := GRID_OFFSET_ROW + GRID_SIZE / 2
 	height_map_pos.x = f32(height_map_col) * CELL_SIZE
 	height_map_pos.y = height_map_bg[height_map_row * HEIGHT_MAP_BG_SIZE + height_map_col]
 	height_map_pos.z = f32(height_map_row) * CELL_SIZE
@@ -80,10 +80,7 @@ init_state :: proc() {
 
 	soldier.pos =
 		state.soldier_pos * {GRID_SIZE * CELL_SIZE, 1, GRID_SIZE * CELL_SIZE} +
-		{GRID_OFFSET * CELL_SIZE, 0, GRID_OFFSET * CELL_SIZE}
-	// camera.pos =
-	// 	state.camera.pos * {GRID_SIZE * CELL_SIZE, 1, GRID_SIZE * CELL_SIZE} +
-	// 	{GRID_OFFSET * CELL_SIZE, 0, GRID_OFFSET * CELL_SIZE}
+		{f32(GRID_OFFSET_COL) * CELL_SIZE, 0, f32(GRID_OFFSET_ROW) * CELL_SIZE}
 	camera.pos = soldier.pos + state.camera.pos
 
 	camera.yaw = state.camera.yaw
@@ -104,14 +101,9 @@ save_state :: proc() {
 
 	state: PersistedState
 	state.soldier_pos =
-		(soldier.pos - {GRID_OFFSET * CELL_SIZE, 0, GRID_OFFSET * CELL_SIZE}) /
+		(soldier.pos - {f32(GRID_OFFSET_COL) * CELL_SIZE, 0, f32(GRID_OFFSET_ROW) * CELL_SIZE}) /
 		{GRID_SIZE * CELL_SIZE, 1, GRID_SIZE * CELL_SIZE}
-
 	state.camera.pos = camera.pos - soldier.pos
-
-	// state.camera.pos =
-	// 	(camera.pos - {GRID_OFFSET * CELL_SIZE, 0, GRID_OFFSET * CELL_SIZE}) /
-	// 	{GRID_SIZE * CELL_SIZE, 1, GRID_SIZE * CELL_SIZE}
 	state.camera.yaw = camera.yaw
 	state.camera.pitch = camera.pitch
 

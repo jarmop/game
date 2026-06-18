@@ -26,7 +26,7 @@ create_pathfinding_data :: proc() {
 }
 
 get_cell_i :: proc(x, z: int) -> int {
-	return (z - GRID_OFFSET) * GRID_SIZE + (x - GRID_OFFSET)
+	return (z - GRID_OFFSET_ROW) * GRID_SIZE + (x - GRID_OFFSET_COL)
 }
 
 update_pathfinding_data_cell :: proc(cell_i: int) {
@@ -89,8 +89,8 @@ update_pathfinding_data_cell :: proc(cell_i: int) {
 }
 
 get_triangle :: proc(p: [3]f32) -> ^Triangle {
-	cell_col := int(math.floor(p.x / CELL_SIZE)) - GRID_OFFSET
-	cell_row := int(math.floor(p.z / CELL_SIZE)) - GRID_OFFSET
+	cell_col := int(math.floor(p.x / CELL_SIZE)) - GRID_OFFSET_COL
+	cell_row := int(math.floor(p.z / CELL_SIZE)) - GRID_OFFSET_ROW
 	cell := cell_table[cell_row * GRID_SIZE + cell_col]
 	triangles := cell.triangles
 
