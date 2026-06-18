@@ -19,13 +19,13 @@ time_delta: f32
 // -------------- IO --------------
 
 camera := Camera {
-	pos   = {13.6, 5.0, 15.9},
+	pos   = {0, 0, 0},
 	front = {0.0, 0.0, -1.0},
 	right = {1.0, 0.0, 0.0},
 	up    = {0.0, 1.0, 0.0},
 	yaw   = -157.5,
 	pitch = -38.3,
-	speed = 10.0,
+	speed = 20 * CELL_SIZE,
 	fov   = 45.0,
 	near  = 0.1,
 	far   = 10000.0,
@@ -78,8 +78,14 @@ init_state :: proc() {
 		fmt.println(json_err)
 	}
 
-	soldier.pos = state.soldier_pos
-	camera.pos = state.camera.pos
+	soldier.pos =
+		state.soldier_pos * {GRID_SIZE * CELL_SIZE, 1, GRID_SIZE * CELL_SIZE} +
+		{GRID_OFFSET * CELL_SIZE, 0, GRID_OFFSET * CELL_SIZE}
+	// camera.pos =
+	// 	state.camera.pos * {GRID_SIZE * CELL_SIZE, 1, GRID_SIZE * CELL_SIZE} +
+	// 	{GRID_OFFSET * CELL_SIZE, 0, GRID_OFFSET * CELL_SIZE}
+	camera.pos = soldier.pos + state.camera.pos
+
 	camera.yaw = state.camera.yaw
 	camera.pitch = state.camera.pitch
 }
@@ -97,8 +103,15 @@ save_state :: proc() {
 	}
 
 	state: PersistedState
-	state.soldier_pos = soldier.pos
-	state.camera.pos = camera.pos
+	state.soldier_pos =
+		(soldier.pos - {GRID_OFFSET * CELL_SIZE, 0, GRID_OFFSET * CELL_SIZE}) /
+		{GRID_SIZE * CELL_SIZE, 1, GRID_SIZE * CELL_SIZE}
+
+	state.camera.pos = camera.pos - soldier.pos
+
+	// state.camera.pos =
+	// 	(camera.pos - {GRID_OFFSET * CELL_SIZE, 0, GRID_OFFSET * CELL_SIZE}) /
+	// 	{GRID_SIZE * CELL_SIZE, 1, GRID_SIZE * CELL_SIZE}
 	state.camera.yaw = camera.yaw
 	state.camera.pitch = camera.pitch
 

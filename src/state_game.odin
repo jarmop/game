@@ -16,7 +16,7 @@ creature_vao: u32
 
 // -------------- SOLDIER --------------
 SOLDIER_SPEED :: 100
-soldiers := []Creature{{pos = [3]f32{0.0, 0.0, 0.0}}}
+soldiers := []Creature{{}}
 soldier_i := 0
 soldier := &soldiers[soldier_i]
 
