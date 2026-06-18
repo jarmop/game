@@ -235,8 +235,8 @@ hover :: proc(x, y: f64) {
 
 			if abs(GRID_OFFSET_ROW_INC) > 0 || abs(GRID_OFFSET_COL_INC) > 0 {
 				// fmt.println("----------- update", GRID_OFFSET_COL_INC, GRID_OFFSET_ROW_INC)
-				GRID_OFFSET_ROW += GRID_OFFSET_ROW_INC
-				GRID_OFFSET_COL += GRID_OFFSET_COL_INC
+				GRID_OFFSET_ROW += GRID_OFFSET_ROW_INC * GRID_CENTER_RADIUS
+				GRID_OFFSET_COL += GRID_OFFSET_COL_INC * GRID_CENTER_RADIUS
 
 				// fmt.println("GRID_OFFSET_ROW", GRID_OFFSET_ROW)
 				// fmt.println("GRID_OFFSET_COL", GRID_OFFSET_COL)
@@ -249,9 +249,6 @@ hover :: proc(x, y: f64) {
 					height_map_bg[:],
 					{min = {0, 0, 0}, max = {0, 0, 0}},
 				)
-				create_pathfinding_data()
-				reset_bb_cache()
-
 				gl.BindVertexArray(ground_vao)
 				gl.BindBuffer(gl.ARRAY_BUFFER, ground_vbo)
 				gl.BufferData(
@@ -260,6 +257,9 @@ hover :: proc(x, y: f64) {
 					raw_data(&ground_vertices),
 					gl.STATIC_DRAW,
 				)
+
+				create_pathfinding_data()
+				reset_bb_cache()
 			}
 		}
 	}
