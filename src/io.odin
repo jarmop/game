@@ -212,7 +212,6 @@ hover :: proc(x, y: f64) {
 
 		if (triangle_d > 0) {
 			// Update height_map_pos
-			// entry_point := camera.pos + ray_world * triangle_d - GROUND_POSITION
 			entry_point := camera.pos + ray_world * triangle_d
 
 			// Add 0.5 to round to the nearest int
@@ -230,31 +229,17 @@ hover :: proc(x, y: f64) {
 
 			GRID_OFFSET_ROW_INC :=
 				int(f32(GRID_CENTER_ROW_D) / f32(abs(GRID_CENTER_ROW_D))) if abs(GRID_CENTER_ROW_D) > GRID_CENTER_RADIUS else 0
-			// GRID_OFFSET_ROW += GRID_OFFSET_ROW_INC
 
 			GRID_OFFSET_COL_INC :=
 				int(f32(GRID_CENTER_COL_D) / f32(abs(GRID_CENTER_COL_D))) if abs(GRID_CENTER_COL_D) > GRID_CENTER_RADIUS else 0
-			// GRID_OFFSET_COL += GRID_OFFSET_COL_INC
-
-			// GRID_OFFSET_ROW_INC := 0
-			// if abs(GRID_CENTER_ROW_D) > GRID_CENTER_RADIUS {
-			// 	GRID_OFFSET_ROW_INC := int(f32(GRID_CENTER_ROW_D) / f32(GRID_CENTER_ROW_D))
-			// }
 
 			if abs(GRID_OFFSET_ROW_INC) > 0 || abs(GRID_OFFSET_COL_INC) > 0 {
-				fmt.println("----------- update", GRID_OFFSET_COL_INC, GRID_OFFSET_ROW_INC)
-				// GRID_OFFSET_ROW_INC :=
-				// 	int(f32(GRID_CENTER_ROW_D) / f32(GRID_CENTER_ROW_D)) if abs(GRID_CENTER_ROW_D) > GRID_CENTER_RADIUS else 0
+				// fmt.println("----------- update", GRID_OFFSET_COL_INC, GRID_OFFSET_ROW_INC)
 				GRID_OFFSET_ROW += GRID_OFFSET_ROW_INC
-
-				// GRID_OFFSET_COL_INC :=
-				// 	int(f32(GRID_CENTER_COL_D) / f32(GRID_CENTER_COL_D)) if abs(GRID_CENTER_COL_D) > GRID_CENTER_RADIUS else 0
 				GRID_OFFSET_COL += GRID_OFFSET_COL_INC
 
-				// fmt.println("PRKL_ROW", f32(GRID_CENTER_ROW_D) / f32(GRID_CENTER_ROW_D))
-				// fmt.println("PRKL_COL", f32(GRID_CENTER_COL_D) / f32(GRID_CENTER_COL_D))
-				fmt.println("GRID_OFFSET_ROW", GRID_OFFSET_ROW)
-				fmt.println("GRID_OFFSET_COL", GRID_OFFSET_COL)
+				// fmt.println("GRID_OFFSET_ROW", GRID_OFFSET_ROW)
+				// fmt.println("GRID_OFFSET_COL", GRID_OFFSET_COL)
 
 				reset_bb_cache()
 
@@ -274,8 +259,6 @@ hover :: proc(x, y: f64) {
 					raw_data(&ground_vertices),
 					gl.STATIC_DRAW,
 				)
-			} else {
-				fmt.println("wtf", GRID_OFFSET_COL_INC, GRID_OFFSET_ROW_INC)
 			}
 		}
 	}

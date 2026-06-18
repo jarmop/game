@@ -31,10 +31,15 @@ edit_height_radius :: proc(cx_m: int, cz_m: int, r: int, y: f32) {
 	max_x := min_x + GRID_SIZE
 	edit_area_min_z := max(cz - r, min_z)
 	edit_area_max_z := min(cz + r, max_z)
-	edit_area_min_x := max(cx - r, min_z)
+	edit_area_min_x := max(cx - r, min_x)
 	edit_area_max_x := min(cx + r, max_x)
-	for z in edit_area_min_z ..= edit_area_max_z {
-		for x in edit_area_min_x ..= edit_area_max_x {
+
+	// fmt.println("--------------------")
+	// fmt.println(edit_area_min_x, edit_area_max_x)
+	// fmt.println(edit_area_min_z, edit_area_max_z)
+
+	for z in edit_area_min_z ..< edit_area_max_z {
+		for x in edit_area_min_x ..< edit_area_max_x {
 			if x < max_x && z < max_z {
 				cells_to_update[cells_to_update_next_i] = {x, z}
 				cells_to_update_next_i += 1
