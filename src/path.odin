@@ -3,6 +3,7 @@ package game
 import "core:fmt"
 import "core:math"
 import "core:math/linalg"
+import gl "vendor:OpenGL"
 
 Triangle :: struct {
 	corners: [3][3]f32,
@@ -314,7 +315,7 @@ get_intersection_y :: proc(p0, p1: [3]f32, pi_xz: [2]f32) -> [3]f32 {
 	return p
 }
 
-update_path :: proc(s: ^Creature, total_movement: f32) {
+move_creature :: proc(s: ^Creature, total_movement: f32) {
 	if s.path_len > 0 {
 		movement := total_movement
 		target_v := s.target - s.pos
@@ -337,5 +338,51 @@ update_path :: proc(s: ^Creature, total_movement: f32) {
 		}
 
 		s.pos += movement * linalg.normalize(target_v)
+
+		update_grid(s.pos)
+	}
+}
+
+update_grid :: proc(p: [3]f32) {
+	GRID_CENTER_Z := f32(GRID_OFFSET_ROW + GRID_SIZE / 2) * CELL_SIZE
+	GRID_CENTER_X := f32(GRID_OFFSET_COL + GRID_SIZE / 2) * CELL_SIZE
+	GRID_CENTER_Z_D := p.z - GRID_CENTER_Z
+	GRID_CENTER_X_D := p.x - GRID_CENTER_X
+
+	GRID_OFFSET_ROW_INC :=
+		int(GRID_CENTER_Z_D / abs(GRID_CENTER_Z_D)) if abs(GRID_CENTER_Z_D) > GRID_CENTER_RADIUS_M else 0
+
+	GRID_OFFSET_COL_INC :=
+		int(GRID_CENTER_X_D / abs(GRID_CENTER_X_D)) if abs(GRID_CENTER_X_D) > GRID_CENTER_RADIUS_M else 0
+
+	// fmt.println(abs(GRID_CENTER_X_D), abs(GRID_CENTER_Z_D))
+
+	if abs(GRID_OFFSET_ROW_INC) > 0 || abs(GRID_OFFSET_COL_INC) > 0 {
+		// fmt.println("----------- update", GRID_OFFSET_COL_INC, GRID_OFFSET_ROW_INC)
+		GRID_OFFSET_ROW += GRID_OFFSET_ROW_INC * GRID_CENTER_RADIUS
+		GRID_OFFSET_COL += GRID_OFFSET_COL_INC * GRID_CENTER_RADIUS
+
+		// fmt.println("GRID_OFFSET_ROW", GRID_OFFSET_ROW)
+		// fmt.println("GRID_OFFSET_COL", GRID_OFFSET_COL)
+
+		create_grid(
+			ground_vertices[:],
+			GRID_OFFSET_COL,
+			GRID_OFFSET_ROW,
+			GRID_SIZE,
+			height_map_bg[:],
+			{min = {0, 0, 0}, max = {0, 0, 0}},
+		)
+		gl.BindVertexArray(ground_vao)
+		gl.BindBuffer(gl.ARRAY_BUFFER, ground_vbo)
+		gl.BufferData(
+			gl.ARRAY_BUFFER,
+			size_of(ground_vertices),
+			raw_data(&ground_vertices),
+			gl.STATIC_DRAW,
+		)
+
+		create_pathfinding_data()
+		reset_bb_cache()
 	}
 }

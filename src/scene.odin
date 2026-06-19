@@ -76,10 +76,11 @@ init_scene :: proc() {
 		0,
 		BACKGROUND_SIZE,
 		height_map_bg[:],
-		{
-			min = {f32(GRID_OFFSET_COL), 0, f32(GRID_OFFSET_ROW)},
-			max = {f32(GRID_OFFSET_COL) + GRID_SIZE, 0, f32(GRID_OFFSET_ROW) + GRID_SIZE},
-		},
+		{min = {0, 0, 0}, max = {0, 0, 0}},
+		// {
+		// 	min = {f32(GRID_OFFSET_COL), 0, f32(GRID_OFFSET_ROW)},
+		// 	max = {f32(GRID_OFFSET_COL) + GRID_SIZE, 0, f32(GRID_OFFSET_ROW) + GRID_SIZE},
+		// },
 	)
 	init_vertices(
 		&ground_bg_vbo,
@@ -514,7 +515,7 @@ update_scene :: proc() {
 	soldier_movement := SOLDIER_SPEED * game_time_delta
 
 	for &s in soldiers {
-		update_path(&s, soldier_movement)
+		move_creature(&s, soldier_movement)
 		s.bb = {
 			min = s.pos,
 			max = s.pos + CREATURE_DIMENSIONS,
@@ -529,7 +530,7 @@ update_scene :: proc() {
 	enemy_movement := ENEMY_SPEED * game_time_delta
 
 	for &e in enemies {
-		update_path(&e, enemy_movement)
+		move_creature(&e, enemy_movement)
 
 		if (e.time_updated + ENEMY_UPDATE_DELAY > game_time) {
 			continue
