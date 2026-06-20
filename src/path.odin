@@ -344,6 +344,12 @@ move_creature :: proc(s: ^Creature, total_movement: f32) {
 }
 
 update_grid :: proc(p: [3]f32) {
+	if p.z - GRID_CENTER_RADIUS_M < 0 ||
+	   p.z + GRID_CENTER_RADIUS_M > BACKGROUND_SIZE_M ||
+	   p.x - GRID_CENTER_RADIUS_M < 0 ||
+	   p.x + GRID_CENTER_RADIUS_M > BACKGROUND_SIZE_M {
+		return
+	}
 	GRID_CENTER_Z := f32(GRID_OFFSET_ROW + GRID_SIZE / 2) * CELL_SIZE
 	GRID_CENTER_X := f32(GRID_OFFSET_COL + GRID_SIZE / 2) * CELL_SIZE
 	GRID_CENTER_Z_D := p.z - GRID_CENTER_Z
