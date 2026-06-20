@@ -173,6 +173,25 @@ init_scene :: proc() {
 	create_cuboid(CORPSE_DIMENSIONS, &corpse_vertices, 1, {true, false, false})
 	init_vertices(&corpse_vbo, &corpse_vao, raw_data(&corpse_vertices), size_of(corpse_vertices))
 
+	// ROCK
+	// rock_vbo: u32
+	// rock_vertices: [CUBOID_VERTEX_COUNT]Vertex
+	// create_cuboid(ROCK_DIMENSIONS, &rock_vertices, 1, {true, false, false})
+	// init_vertices(&rock_vbo, &rock_vao, raw_data(&rock_vertices), size_of(rock_vertices))
+	// for z := GRID_OFFSET_ROW; z < GRID_OFFSET_ROW + GRID_SIZE; z += 50 {
+	// 	for x := GRID_OFFSET_COL; x < GRID_OFFSET_COL + GRID_SIZE; x += 50 {
+	// 		append(
+	// 			&rocks,
+	// 			[3]f32 {
+	// 				f32(x) * CELL_SIZE,
+	// 				height_map_bg[z * HEIGHT_MAP_BG_SIZE + x],
+	// 				f32(z) * CELL_SIZE,
+	// 			},
+	// 		)
+	// 	}
+	// }
+	// fmt.println(len(rocks[:]))
+
 	// BULLET
 	gl.GenVertexArrays(1, &bullet_path_vao)
 	gl.BindVertexArray(bullet_path_vao)
@@ -311,6 +330,8 @@ draw_scene :: proc() {
 	w_bg: f32 = 1.0
 	w_line: f32 = 0.0
 
+	// gl.Enable(gl.CULL_FACE)
+	// gl.CullFace(gl.FRONT)
 	if SHOW_GROUND_TEXTURE {
 		use_texture_shader(view, projection)
 		gl.BindTexture(gl.TEXTURE_2D, scene_texture)
@@ -364,6 +385,7 @@ draw_scene :: proc() {
 		shader_set_vec3(color_shader_program, "color", {1.0, 0.75, 0.5})
 		gl.DrawArrays(gl.TRIANGLES, 0, GROUND_VERTICES_COUNT * 16)
 	}
+	// gl.Disable(gl.CULL_FACE)
 
 	// WALL
 	use_color_shader(view, projection)
@@ -410,6 +432,12 @@ draw_scene :: proc() {
 	for pos in corpses {
 		draw_object(pos, {0.5, 0.0, 0.0}, &corpse_vao, color_shader_program)
 	}
+
+	// ROCK
+	// use_color_shader(view, projection)
+	// for pos in rocks {
+	// 	draw_object(pos, {0.5, 0.5, 0.5}, &rock_vao, color_shader_program)
+	// }
 
 	// BULLET
 	gl.UseProgram(bullet_shader_program)

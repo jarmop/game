@@ -2,7 +2,7 @@ package game
 
 // -------------- GROUND --------------
 
-GRID_SIZE :: 4
+GRID_SIZE :: 256
 BACKGROUND_SIZE :: 4 * GRID_SIZE
 GRID_OFFSET := (BACKGROUND_SIZE - GRID_SIZE) / 2
 GRID_OFFSET_ROW := GRID_OFFSET
@@ -18,8 +18,8 @@ CELL_SIZE :: 4.0
 GROUND_SIZE :: GRID_SIZE * CELL_SIZE
 GROUND_POSITION :: [3]f32{0.0, -0.01, 0.0}
 
-// SHOW_GROUND_WIREFRAME :: false
-SHOW_GROUND_WIREFRAME :: true
+SHOW_GROUND_WIREFRAME :: false
+// SHOW_GROUND_WIREFRAME :: true
 SHOW_GROUND_TEXTURE :: false
 // SHOW_GROUND_TEXTURE :: true
 
@@ -75,3 +75,8 @@ walls_z := []Wall {
 	// {pos = {-0.1 + CELL_SIZE * 10, 0, -0.1 + CELL_SIZE * 12}},
 	// {pos = {-0.1 + CELL_SIZE * 10, 0, -0.1 + CELL_SIZE * 13}},
 }
+
+// ROCK
+// ROCK_DIMENSIONS :: [3]f32{10.0, 10.0, 10.0}
+// rock_vao: u32
+// rocks: [dynamic][3]f32
